@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     int n_threads = DEFAULT_THREADS;
     int max_iters = DEFAULT_MAX_ITERS;
     double start_time, exec_time, sse;
-    int n_iters, debug_mode;
+    int n_iters, debug_mode = 0;
 
     byte_t *data;
 
