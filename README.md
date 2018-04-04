@@ -1,18 +1,18 @@
 # image-segmentation
-The goal of the project is to achieve image segmentation using the standard 
-kmeans clustering algorithm and to speed up the execution exploiting different 
+The goal of the project is to achieve image segmentation using the standard
+k-means clustering algorithm and to speed up the execution exploiting different
 multithreading programming paradigms.
 
-### Usage 
-The program can be compiled using gcc and including the OpenMP flag.
+### Usage
+The program can be compiled using the make command.
 ```
-gcc -fopenmp src/main.c src/img_io.c src/kmeans.c src/utils.c -o img_seg
+make imgseg
 ```
 
 All the infos about the usage can be obtained by launching the
-program from command line specifing the -h parameter.
+program from command line specifying the -h parameter.
 ```
-./img_seg -h
+./imgseg -h
 ```
 
 ### Credits

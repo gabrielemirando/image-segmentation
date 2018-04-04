@@ -5,6 +5,8 @@
 
 !*/
 
+!Makefile
+
 # DS Store
 .DS_Store
 
