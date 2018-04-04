@@ -52,7 +52,7 @@ int main(int argc, char **argv)
     byte_t *data;
 
     char optchar;
-    while ((optchar = getopt(argc, argv, "i:o:k:m:p:t:d")) != EOF) {
+    while ((optchar = getopt(argc, argv, "i:o:k:m:p:t:dh")) != EOF) {
         switch (optchar) {
             case 'i':
                 in_path = optarg;
@@ -75,6 +75,7 @@ int main(int argc, char **argv)
             case 'd':
                 debug_mode = 1;
                 break;
+            case 'h':
             default:
                 print_help(argv[0]);
                 break;
