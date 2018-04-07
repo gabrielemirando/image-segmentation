@@ -1,32 +1,11 @@
-/*
- * Image segmentation using k-means algorithm
- * --------------------------------------------------
- * Author: Gabriele Mirando
- *
- * About:  The goal of the project is to achieve image segmentation using the
- *         standard kmeans clustering algorithm and to speed up the execution
- *         exploiting different multithreading programming paradigms.
- *
- * Help:   External libraries have been used for handling the i/o of images.
- *          - stb_image (v2.19): to load the values of each pixel of the images.
- *          - stb_image_write (v1.09): to create images from pixel values.
- *         These libraries are available at https://github.com/nothings/stb.
- */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
 #include <omp.h>
 
-#define OMP "omp"
-#define CUDA "cuda"
-#define SERIAL "serial"
-
 #define DEFAULT_MAX_ITERS 150
 #define DEFAULT_THREADS 1
-
-#define DEBUG_SEED 2
 
 #include "img_io.h"
 #include "kmeans.h"
@@ -34,14 +13,14 @@
 
 void print_help(char *pgr_name);
 
-void print_details(int n_pixels, int n_channels, int n_clusts, char *pgr_paradigm,
+void print_details(int n_pixels, int n_channels, int n_clusts,
                    int n_threads, double exec_time, double sse, int n_iters);
 
 int main(int argc, char **argv)
 {
     char *in_path = NULL;
     char *out_path = NULL;
-    char *pgr_paradigm = SERIAL;
+
     int width, height, n_pixels;
     int n_channels, n_clusts = -1;
     int n_threads = DEFAULT_THREADS;

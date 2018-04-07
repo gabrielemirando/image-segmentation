@@ -83,7 +83,7 @@ void kmeans(byte_t *data, int n_pixels, int n_channels, int n_clusts,
  * Variant of "kmeans" using OpenMP.
  *
  *  n_threads: the number of threads to use for multithreading. At the end of
- *             the execution it will contain the number of threads
+ *             the execution it will contain the actual number of threads
  *             given to the program by the system
  */
 void kmeans_omp(byte_t *data, int n_pixels, int n_channels, int n_clusts,

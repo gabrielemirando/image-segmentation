@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -7,8 +8,7 @@
 #include "../libs/stb_image.h"
 #include "../libs/stb_image_write.h"
 
-#include "img_io.h"
-#include "utils.h"
+#include "image_io.h"
 
 byte_t *img_load(char *img_file, int *width, int *height, int *n_channels)
 {
@@ -29,15 +29,20 @@ void img_save(char *img_file, byte_t *data, int width, int height, int n_channel
 {
     char *ext;
 
-    ext = file_extension(img_file);
+    ext = strrchr(img_file, '.');
 
-    if (strings_equal(ext, "jpeg") || strings_equal(ext, "jpg")) {
+    if (!ext) {
+        fprintf(stderr, "ERROR SAVING IMAGE: << Unspecified format >> \n\n");
+        return;
+    }
+
+    if ((strcmp(ext, ".jpeg") == 0) || (strcmp(ext, ".jpg") == 0)) {
         stbi_write_jpg(img_file, width, height, n_channels, data, 100);
-    } else if (strings_equal(ext, "png")) {
+    } else if (strcmp(ext, ".png") == 0) {
         stbi_write_png(img_file, width, height, n_channels, data, width * n_channels);
-    } else if (strings_equal(ext, "bmp")) {
+    } else if (strcmp(ext, ".bmp") == 0) {
         stbi_write_bmp(img_file, width, height, n_channels, data);
-    } else if (strings_equal(ext, "tga")) {
+    } else if (strcmp(ext, ".tga") == 0) {
         stbi_write_tga(img_file, width, height, n_channels, data);
     } else {
         fprintf(stderr, "ERROR SAVING IMAGE: << Unsupported format >> \n\n");

@@ -1,5 +1,5 @@
-#ifndef IMG_IO_H
-#define IMG_IO_H
+#ifndef IMAGE_IO_H
+#define IMAGE_IO_H
 
 /*
  * Type Definition: byte_t

@@ -6,7 +6,6 @@
 
 #include "img_io.h"
 #include "kmeans.h"
-#include "utils.h"
 
 double *rand_centers(byte_t *data, int n_pixels, int n_channels, int n_clusts)
 {
