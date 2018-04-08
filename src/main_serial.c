@@ -90,12 +90,12 @@ void print_details(int n_pixels, int n_channels, int n_clusts,
 {
     char *details = "EXECUTION DETAILS\n"
         "-------------------------------------------------------\n"
-        "  Number of pixels        : %d\n"
-        "  Number of channels      : %d\n"
-        "  Number of clusters      : %d\n"
-        "  Execution time          : %f\n"
-        "  Sum of Squared Errors   : %f\n"
-        "  Number of iterations    : %d\n";
+        "  Number of pixels      : %d\n"
+        "  Number of channels    : %d\n"
+        "  Number of clusters    : %d\n"
+        "  Execution time        : %f\n"
+        "  Sum of Squared Errors : %f\n"
+        "  Number of iterations  : %d\n";
 
     fprintf(stdout, details, n_pixels, n_channels, n_clusts, exec_time, sse, n_iters);
 }

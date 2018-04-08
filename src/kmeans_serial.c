@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include <float.h>
 #include <math.h>
 #include <omp.h>

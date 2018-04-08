@@ -4,145 +4,139 @@
 #include <time.h>
 #include <omp.h>
 
-#define DEFAULT_MAX_ITERS 150
-#define DEFAULT_THREADS 1
-
-#include "img_io.h"
+#include "image_io.h"
 #include "kmeans.h"
-#include "utils.h"
 
-void print_help(char *pgr_name);
+#define DEFAULT_N_CLUSTS 4
+#define DEFAULT_MAX_ITERS 500
+#define DEFAULT_N_THREADS 2
+#define DEFAULT_OUT_PATH "result.jpg"
 
-void print_details(int n_pixels, int n_channels, int n_clusts,
-                   int n_threads, double exec_time, double sse, int n_iters);
+void print_usage(char *pgr_name);
+
+void print_details(int n_pixels, int n_channels, int n_clusts, int n_threads,
+                   double exec_time, double sse, int n_iters);
 
 int main(int argc, char **argv)
 {
     char *in_path = NULL;
-    char *out_path = NULL;
-
-    int width, height, n_pixels;
-    int n_channels, n_clusts = -1;
-    int n_threads = DEFAULT_THREADS;
+    char *out_path = DEFAULT_OUT_PATH;
+    int width, height, n_pixels, n_channels;
+    int n_clusts = DEFAULT_N_CLUSTS;
     int max_iters = DEFAULT_MAX_ITERS;
+    int n_threads = DEFAULT_N_THREADS;
+    int seed = time(NULL), n_iters;
     double start_time, exec_time, sse;
-    int n_iters, debug_mode = 0;
-
     byte_t *data;
 
     char optchar;
-    while ((optchar = getopt(argc, argv, "i:o:k:m:p:t:dh")) != EOF) {
+    while ((optchar = getopt(argc, argv, "k:m:o:s:t:h")) != -1) {
         switch (optchar) {
-            case 'i':
-                in_path = optarg;
-                break;
-            case 'o':
-                out_path = optarg;
-                break;
             case 'k':
                 n_clusts = strtol(optarg, NULL, 10);
                 break;
             case 'm':
                 max_iters = strtol(optarg, NULL, 10);
                 break;
-            case 'p':
-                pgr_paradigm = optarg;
+            case 'o':
+                out_path = optarg;
+                break;
+            case 's':
+                seed = strtol(optarg, NULL, 10);
                 break;
             case 't':
                 n_threads = strtol(optarg, NULL, 10);
                 break;
-            case 'd':
-                debug_mode = 1;
-                break;
             case 'h':
             default:
-                print_help(argv[0]);
+                print_usage(argv[0]);
+                exit(EXIT_FAILURE);
                 break;
         }
     }
 
-    if (in_path == NULL || out_path == NULL || n_clusts < 2 || n_threads < 1 || max_iters < 1) {
-        print_help(argv[0]);
+    in_path = argv[optind];
+
+    if (in_path == NULL) {
+        print_usage(argv[0]);
+        exit(EXIT_FAILURE);
     }
 
-    if (debug_mode) {
-        srand(DEBUG_SEED);
-    } else {
-        srand(time(NULL));
+    if (n_clusts < 2) {
+        fprintf(stderr, "INPUT ERROR: << Invalid number of clusters >> \n");
+        exit(EXIT_FAILURE);
     }
+
+    if (max_iters < 1) {
+        fprintf(stderr, "INPUT ERROR: << Invalid maximum number of iterations >> \n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (n_threads < 2) {
+        fprintf(stderr, "INPUT ERROR: << Invalid number of threads >> \n");
+        exit(EXIT_FAILURE);
+    }
+
+    srand(seed);
 
     data = img_load(in_path, &width, &height, &n_channels);
-
     n_pixels = width * height;
 
     start_time = omp_get_wtime();
-
-    if (strings_equal(pgr_paradigm, SERIAL)) {
-        kmeans(data, n_pixels, n_channels, n_clusts, max_iters, &sse, &n_iters);
-    } else if (strings_equal(pgr_paradigm, OMP)) {
-        kmeans_omp(data, n_pixels, n_channels, n_clusts, max_iters, &sse, &n_iters, &n_threads);
-    } else if (strings_equal(pgr_paradigm, CUDA)) {
-
-    }
-
+//    kmeans_omp(data, n_pixels, n_channels, n_clusts, max_iters, &sse, &n_iters, &n_threads);
     exec_time = omp_get_wtime() - start_time;
 
     img_save(out_path, data, width, height, n_channels);
 
-    print_details(n_pixels, n_channels, n_clusts, pgr_paradigm,
-                  n_threads, exec_time, sse, n_iters);
+    print_details(n_pixels, n_channels, n_clusts, n_threads, exec_time, sse, n_iters);
 
     free(data);
 
     return EXIT_SUCCESS;
 }
 
-void print_details(int n_pixels, int n_channels, int n_clusts, char *pgr_paradigm,
-                   int n_threads, double exec_time, double sse, int n_iters)
+void print_details(int n_pixels, int n_channels, int n_clusts, int n_threads,
+                   double exec_time, double sse, int n_iters)
 {
     char *details = "EXECUTION DETAILS\n"
         "-------------------------------------------------------\n"
-        "  Number of pixels        : %d\n"
-        "  Number of channels      : %d\n"
-        "  Number of clusters      : %d\n"
-        "  Programming paradigm    : %s\n"
-        "  Number of threads (omp) : %d\n"
-        "  Execution time          : %f\n"
-        "  Sum of Squared Errors   : %f\n"
-        "  Number of iterations    : %d\n";
+        "  Number of pixels      : %d\n"
+        "  Number of channels    : %d\n"
+        "  Number of clusters    : %d\n"
+        "  Number of threads     : %d\n"
+        "  Execution time        : %f\n"
+        "  Sum of Squared Errors : %f\n"
+        "  Number of iterations  : %d\n";
 
-    fprintf(stdout, details,
-            n_pixels, n_channels, n_clusts,
-            pgr_paradigm, n_threads,
-            exec_time, sse, n_iters);
+    fprintf(stdout, details, n_pixels, n_channels, n_clusts, n_threads, exec_time, sse, n_iters);
 }
 
-void print_help(char *pgr_name)
+void print_usage(char *pgr_name)
 {
-    char *help = "MAIN USAGE: %s [-i input_img] [-o output_img] [-k num_clusters] \n"
-        "-------------------------------------------------------\n"
-        "     -i input_img    : [MANDATORY] input image file. Valid input image formats \n"
-        "                       are JPEG, PNG, BMP, GIF, TGA, PSD, PIC, HDR, PNM.  \n"
-        "     -o output_img   : [MANDATORY] output image file. Valid output image \n"
-        "                       formats are JPEG, PNG, BMP, TGA.  \n"
-        "     -k num_clusters : [MANDATORY] number of clusters. Must be bigger than 1. \n"
-        "     -m max_iters    : maximum number of iterations that the clustering \n"
-        "                       algorithm can perform before being forced to stop. \n"
-        "                       Default is %d. Must be bigger that 0.\n"
-        "     -p pgr_paradigm : programming paradigm. Default is '%s', but '%s' and \n"
-        "                       '%s' are also available. \n"
-        "     -t num_threads  : number of threads. This argument will be taken in \n"
-        "                       consideration only if OMP was specified as programming \n"
-        "                       paradigm. Default is %d. Must be bigger than 0. \n"
-        "     -d              : debug flag. If present the kmeans algorithm \n"
-        "                       will always use the same set of initial centers. \n"
-        "     -h              : print this help information. \n";
+    char *usage = "USAGE \n\n"
+        "   %s [-h] [-k num_clusters] [-m max_iters] [-o output_img] \n"
+        "            [-o output_img] [-s seed] [-t num_threads] input_image \n\n"
+        "   The input image filepath is the only mandatory argument and \n"
+        "   must be specified last, after all the optional parameters. \n"
+        "   Valid input image formats are JPEG, PNG, BMP, GIF, TGA, PSD, \n"
+        "   PIC, HDR and PNM. \n\n"
+        "OPTIONAL PARAMETERS \n\n"
+        "   -k num_clusters : number of clusters to use for the segmentation of \n"
+        "                     the image. Must be bigger than 1. Default is %d. \n"
+        "   -m max_iters    : maximum number of iterations that the clustering \n"
+        "                     algorithm can perform before being forced to stop. \n"
+        "                     Must be bigger that 0. Default is %d. \n"
+        "   -o output_image : filepath of the output image. Valid output image \n"
+        "                     formats are JPEG, PNG, BMP and TGA. If not specified, \n"
+        "                     the resulting image will be saved in the current \n"
+        "                     directory using JPEG format. \n"
+        "   -s seed         : seed to use for the random selection of the initial \n"
+        "                     centers. The clustering algorithm will always use  \n"
+        "                     the same set of initial centers when a certain \n"
+        "                     seed is specified. \n"
+        "   -t num_threads  : number of threads to use for the clustering algorithm. \n"
+        "                     Must be bigger than 1. Default is %d. \n"
+        "   -h              : print usage information. \n";
 
-    fprintf(stderr, help,
-            pgr_name,
-            DEFAULT_MAX_ITERS,
-            SERIAL, OMP, CUDA,
-            DEFAULT_THREADS);
-
-    exit(EXIT_FAILURE);
+    fprintf(stderr, usage, pgr_name, DEFAULT_N_CLUSTS, DEFAULT_MAX_ITERS, DEFAULT_N_THREADS);
 }
