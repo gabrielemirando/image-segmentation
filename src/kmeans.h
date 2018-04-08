@@ -2,62 +2,6 @@
 #define KMEANS_H
 
 /*
- * Function:  rand_centers
- * --------------------
- * Select a set of centers at random from the pixels of the image.
- *
- *  data:       array containing the values of each color channel for all the
- *              pixels of the image
- *  n_pixels:   number of pixels of the image
- *  n_channels: number of channels of the image
- *  n_clusts:   number of clusters
- *
- *  returns:    an array containing the initial set of centers choosed
- *              selecting at random different pixels
- */
-double *rand_centers(byte_t *data, int n_pixels, int n_channels, int n_clusts);
-
-/*
-* Function:  sqr_distance
-* --------------------
-* Calculates the squared euclidean distance between one pixel and a center.
-*
-*  pixel:      array containing the channel values of a pixel
-*  center:     array containing the channel values of a cluster center
-*  n_channels: number of channels of the image
-*
-*  returns:    squared euclidean distance between a pixel and a cluster center
-*/
-double sqr_distance(byte_t *pixel, double *center, int n_channels);
-
-/*
- * Function:  closest_clust
- * --------------------
- * Discovers the cluster center closest to a given pixel.
- *
- *  pixel:      array containing the channel values of a pixel
- *  centers:    array containing the values of the clusters centers
- *  n_clusts:   number of clusters
- *  n_channels: number of channels of the image
- *  clust_dist: will contain the distance to the closest cluster (passed by reference)
- *
- *  returns:    label of the cluster closest to the given pixel
- */
-int closest_clust(byte_t *pixel, double *centers, int n_clusts, int n_channels, double *clust_dist);
-
-/*
-* Function:  farthest_pixel
-* --------------------
-* Discovers the pixel that is farthest to the center of its cluster.
-*
-*  dists:      array containing the distances of each pixel to the center of its cluster
-*  n_pixels:   number of pixels of the image
-*
-*  returns:    number of the pixel that is farthest to the center of its cluster
-*/
-int farthest_pixel(double *dists, int n_pixels);
-
-/*
  * Function:  kmeans
  * --------------------
  * Executes the "standard" kmeans clustering algorithm on data of pixel provided.

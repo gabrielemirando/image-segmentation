@@ -5,10 +5,10 @@
 #include <omp.h>
 
 #include "image_io.h"
-//#include "kmeans.h"
+#include "kmeans.h"
 
 #define DEFAULT_N_CLUSTS 4
-#define DEFAULT_MAX_ITERS 150
+#define DEFAULT_MAX_ITERS 500
 #define DEFAULT_OUT_PATH "result.jpg"
 
 void print_usage(char *pgr_name);
@@ -73,7 +73,7 @@ int main(int argc, char **argv)
     n_pixels = width * height;
 
     start_time = omp_get_wtime();
-    //kmeans(data, n_pixels, n_channels, n_clusts, max_iters, &sse, &n_iters);
+    kmeans(data, n_pixels, n_channels, n_clusts, max_iters, &sse, &n_iters);
     exec_time = omp_get_wtime() - start_time;
 
     img_save(out_path, data, width, height, n_channels);
@@ -102,8 +102,7 @@ void print_details(int n_pixels, int n_channels, int n_clusts,
 
 void print_usage(char *pgr_name)
 {
-    char *usage =
-        "USAGE \n\n"
+    char *usage = "USAGE \n\n"
         "   %s [-h] [-k num_clusters] [-m max_iters] [-o output_img] \n"
         "            [-o output_img] [-s seed] input_image \n\n"
         "   The input image filepath is the only mandatory argument and \n"
