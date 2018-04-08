@@ -3,7 +3,6 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#define STBI_FAILURE_USERMSG
 
 #include "../libs/stb_image.h"
 #include "../libs/stb_image_write.h"
@@ -13,12 +12,10 @@
 byte_t *img_load(char *img_file, int *width, int *height, int *n_channels)
 {
     byte_t *data;
-    char *error_msg;
 
     data = stbi_load(img_file, width, height, n_channels, 0);
     if (data == NULL) {
-        error_msg = "ERROR LOADING IMAGE: << %s >> \n";
-        fprintf(stderr, error_msg, stbi_failure_reason());
+        fprintf(stderr, "ERROR LOADING IMAGE: << Invalid file name or format >> \n");
         exit(EXIT_FAILURE);
     }
 

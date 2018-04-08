@@ -1,21 +1,16 @@
 CC = gcc
-CFLAG = -Wall
-LIBS = -fopenmp -lm
 
-imgseg: main.o img_io.o kmeans.o utils.o
-	${CC} ${CFLAG} main.o img_io.o kmeans.o utils.o -o imgseg ${LIBS}
+serial.out: main_serial.o kmeans_serial.o image_io.o
+	${CC} -Wall -fopenmp -o serial.out main_serial.o kmeans_serial.o image_io.o -lm
 
-main.o: src/main.c src/img_io.c src/img_io.h src/kmeans.c src/kmeans.h src/utils.c src/utils.h
-	${CC} ${CFLAG} -c src/main.c ${LIBS}
+main_serial.o: src/main_serial.c src/image_io.h src/image_io.c src/kmeans.h src/kmeans_serial.c
+	${CC} -Wall -c src/main_serial.c
 
-img_io.o: src/img_io.c src/img_io.h src/utils.c src/utils.h
-	${CC} ${CFLAG} -c src/img_io.c ${LIBS}
+kmeans_serial.o: src/image_io.h src/kmeans.h src/kmeans_serial.c
+	${CC} -Wall -c src/kmeans_serial.c
 
-kmeans.o: src/img_io.c src/img_io.h src/kmeans.c src/kmeans.h src/utils.c src/utils.h
-	${CC} ${CFLAG} -c src/kmeans.c ${LIBS}
-
-utils.o: src/utils.c src/utils.h
-	${CC} ${CFLAG} -c src/utils.c ${LIBS}
+image_io.o: src/image_io.c src/image_io.h
+	${CC} -Wall -c src/image_io.c
 
 clean:
-	-rm *.o imgseg
+	-rm *.o serial.out
