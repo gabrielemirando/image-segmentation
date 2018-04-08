@@ -26,12 +26,10 @@ void kmeans(byte_t *data, int n_pixels, int n_channels, int n_clusts,
  * --------------------
  * Variant of "kmeans" using OpenMP.
  *
- *  n_threads: the number of threads to use for multithreading. At the end of
- *             the execution it will contain the actual number of threads
- *             given to the program by the system
+ *  n_threads: the number of threads to use
  */
 void kmeans_omp(byte_t *data, int n_pixels, int n_channels, int n_clusts,
-                int max_iters, double *sse, int *iters, int *n_threads);
+                int max_iters, double *sse, int *iters, int n_threads);
 
 /*
  * Function:  kmeans_cuda

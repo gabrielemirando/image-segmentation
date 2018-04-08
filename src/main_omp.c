@@ -83,7 +83,7 @@ int main(int argc, char **argv)
     n_pixels = width * height;
 
     start_time = omp_get_wtime();
-//    kmeans_omp(data, n_pixels, n_channels, n_clusts, max_iters, &sse, &n_iters, &n_threads);
+    kmeans_omp(data, n_pixels, n_channels, n_clusts, max_iters, &sse, &n_iters, n_threads);
     exec_time = omp_get_wtime() - start_time;
 
     img_save(out_path, data, width, height, n_channels);
