@@ -8,7 +8,7 @@
 #include "kmeans.h"
 
 #define DEFAULT_N_CLUSTS 4
-#define DEFAULT_MAX_ITERS 500
+#define DEFAULT_MAX_ITERS 150
 #define DEFAULT_N_THREADS 2
 #define DEFAULT_OUT_PATH "result.jpg"
 

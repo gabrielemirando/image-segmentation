@@ -5,9 +5,6 @@ multithreading programming paradigms.
 
 ### Usage
 The program can be compiled using the make command.
-```
-make imgseg
-```
 
 All the infos about the usage can be obtained by launching the
 program from command line specifying the -h parameter.

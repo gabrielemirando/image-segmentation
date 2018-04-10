@@ -8,7 +8,7 @@
 #include "kmeans.h"
 
 #define DEFAULT_N_CLUSTS 4
-#define DEFAULT_MAX_ITERS 500
+#define DEFAULT_MAX_ITERS 150
 #define DEFAULT_OUT_PATH "result.jpg"
 
 void print_usage(char *pgr_name);
