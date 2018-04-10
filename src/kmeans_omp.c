@@ -24,21 +24,23 @@ void update_data(byte_t *data, double *centers, int *labels,
 void kmeans_omp(byte_t *data, int n_pixels, int n_channels, int n_clusts,
                 int max_iters, double *sse, int *iters, int n_threads)
 {
-    int px, ch, k, j;
+    int px, ch, k, j, th;
     int px_off, k_off, k_size;
     int iter, changes;
     int min_k, far_px;
     int *counts, *labels;
+    int thread_num, thcen_off, thcount_off;
     double *centers, *tmp_centers, *dists;
 
     k_size = n_clusts * n_channels;
 
     centers = malloc(k_size * sizeof(double));
-    tmp_centers = malloc(k_size * sizeof(double));
-    counts = malloc(n_clusts * sizeof(int));
+    tmp_centers = malloc(n_threads * k_size * sizeof(double));
+    counts = malloc(n_threads * n_clusts * sizeof(int));
     labels = malloc(n_pixels * sizeof(int));
     dists = malloc(n_pixels * sizeof(double));
 
+    omp_set_dynamic(0);
     omp_set_num_threads(n_threads);
 
     init_centers(data, centers, n_clusts, n_pixels, n_channels);
@@ -46,35 +48,56 @@ void kmeans_omp(byte_t *data, int n_pixels, int n_channels, int n_clusts,
     for (iter = 0; iter < max_iters; iter++) {
         changes = 0;
 
-        for (j = 0; j < k_size; j++) {
-            tmp_centers[j] = 0;
-        }
+        #pragma omp parallel private(thread_num, thcen_off, thcount_off, j, k)
+        {
+            thread_num = omp_get_thread_num();
+            thcen_off = thread_num * k_size;
+            thcount_off = thread_num * n_clusts;
 
-        for (k = 0; k < n_clusts; k++) {
-            counts[k] = 0;
-        }
-
-        for (px = 0; px < n_pixels; px++) {
-            px_off = px * n_channels;
-
-            min_k = closest_clust(&dists[px], &data[px_off], centers,
-                                  n_clusts, n_channels);
-
-            if (labels[px] != min_k) {
-                labels[px] = min_k;
-                changes = 1;
+            for (j = 0; j < k_size; j++) {
+                tmp_centers[thcen_off + j] = 0;
             }
 
-            counts[min_k]++;
+            for (k = 0; k < n_clusts; k++) {
+                counts[thcount_off + k] = 0;
+            }
 
-            k_off = min_k * n_channels;
-            for (ch = 0; ch < n_channels; ch++) {
-                tmp_centers[k_off + ch] += data[px_off + ch];
+            #pragma omp for schedule(static) private(px, px_off, min_k, k_off, ch)
+            for (px = 0; px < n_pixels; px++) {
+                px_off = px * n_channels;
+
+                min_k = closest_clust(&dists[px], &data[px_off], centers,
+                                      n_clusts, n_channels);
+
+                if (labels[px] != min_k) {
+                    labels[px] = min_k;
+                    changes = 1;
+                }
+
+                k_off = thcen_off + min_k * n_channels;
+                for (ch = 0; ch < n_channels; ch++) {
+                    tmp_centers[k_off + ch] += data[px_off + ch];
+                }
+
+                counts[thcount_off + min_k]++;
             }
         }
 
         if (!changes) {
             break;
+        }
+
+        for (th = 1; th < n_threads; th++) {
+            thcen_off = th * k_size;
+            thcount_off = th * n_clusts;
+
+            for (j = 0; j < k_size; j++) {
+                tmp_centers[j] += tmp_centers[thcen_off + j];
+            }
+
+            for (k = 0; k < n_clusts; k++) {
+                counts[k] += counts[thcount_off + k];
+            }
         }
 
         for (k = 0; k < n_clusts; k++) {
