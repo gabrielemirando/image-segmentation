@@ -1,16 +1,13 @@
-# image-segmentation
-The goal of the project is to achieve image segmentation using the standard
-k-means clustering algorithm and to speed up the execution exploiting different
-multithreading programming paradigms.
+# Image segmentation
+The goal of the project is to implement color-based image segmentation using the 
+standard k-means clustering algorithm and to speed up the execution exploiting 
+different multithreading programming paradigms.
 
 ### Usage
 The program can be compiled using the make command.
 
 All the infos about the usage can be obtained by launching the
 program from command line specifying the -h parameter.
-```
-./imgseg -h
-```
 
 ### Credits
 External help have been used for handling the i/o of images.
