@@ -104,7 +104,7 @@ void print_usage(char *pgr_name)
 {
     char *usage = "USAGE \n\n"
         "   %s [-h] [-k num_clusters] [-m max_iters] [-o output_img] \n"
-        "            [-o output_img] [-s seed] input_image \n\n"
+        "                [-o output_img] [-s seed] input_image \n\n"
         "   The input image filepath is the only mandatory argument and \n"
         "   must be specified last, after all the optional parameters. \n"
         "   Valid input image formats are JPEG, PNG, BMP, GIF, TGA, PSD, \n"
