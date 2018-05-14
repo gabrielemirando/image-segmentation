@@ -17,10 +17,10 @@ typedef unsigned char byte_t;
  * Opens an image and loads the values of its pixels.
  *
  *  img_file:   path of the image to open
- *  width:      will contain the width of the image (passed by reference)
- *  height:     will contain the height of the image (passed by reference)
+ *  width:      will contain the width of the image
+ *  height:     will contain the height of the image
  *  n_channels: will contain the number of color channels
- *              of the image (passed by reference)
+ *              of the image
  *
  *  returns:    an array allocated in memory containing the values
  *              of each color channel for all the pixels of the image.
@@ -30,7 +30,7 @@ byte_t *img_load(char *img_file, int *width, int *height, int *n_channels);
 /*
  * Function:  img_save
  * --------------------
- * Creates a new JPEG image using the pixels values provided.
+ * Creates a new image file using the pixels values provided.
  *
  *  img_file:   path of the image to create
  *  data:       array containing the values of each color

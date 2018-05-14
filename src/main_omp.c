@@ -5,7 +5,7 @@
 #include <omp.h>
 
 #include "image_io.h"
-#include "kmeans.h"
+#include "segmentation.h"
 
 #define DEFAULT_N_CLUSTS 4
 #define DEFAULT_MAX_ITERS 150
@@ -15,19 +15,20 @@
 void print_usage(char *pgr_name);
 
 void print_details(int n_pixels, int n_channels, int n_clusts, int n_threads,
-                   double exec_time, double sse, int n_iters);
+                   int n_iters, double sse, double exec_time);
 
 int main(int argc, char **argv)
 {
     char *in_path = NULL;
     char *out_path = DEFAULT_OUT_PATH;
-    int width, height, n_pixels, n_channels;
-    int n_clusts = DEFAULT_N_CLUSTS;
-    int max_iters = DEFAULT_MAX_ITERS;
-    int n_threads = DEFAULT_N_THREADS;
-    int seed = time(NULL), n_iters;
-    double start_time, exec_time, sse;
     byte_t *data;
+    int width, height;
+    int n_pixels, n_channels;
+    int n_clusts = DEFAULT_N_CLUSTS;
+    int n_iters = DEFAULT_MAX_ITERS;
+    int n_threads = DEFAULT_N_THREADS;
+    int seed = time(NULL);
+    double sse, start_time, exec_time;
 
     char optchar;
     while ((optchar = getopt(argc, argv, "k:m:o:s:t:h")) != -1) {
@@ -36,7 +37,7 @@ int main(int argc, char **argv)
                 n_clusts = strtol(optarg, NULL, 10);
                 break;
             case 'm':
-                max_iters = strtol(optarg, NULL, 10);
+                n_iters = strtol(optarg, NULL, 10);
                 break;
             case 'o':
                 out_path = optarg;
@@ -67,7 +68,7 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    if (max_iters < 1) {
+    if (n_iters < 1) {
         fprintf(stderr, "INPUT ERROR: << Invalid maximum number of iterations >> \n");
         exit(EXIT_FAILURE);
     }
@@ -81,14 +82,11 @@ int main(int argc, char **argv)
 
     data = img_load(in_path, &width, &height, &n_channels);
     n_pixels = width * height;
-
     start_time = omp_get_wtime();
-    kmeans_omp(data, n_pixels, n_channels, n_clusts, max_iters, &sse, &n_iters, n_threads);
+    kmeans_segm_omp(data, n_pixels, n_channels, n_clusts, &n_iters, &sse, n_threads);
     exec_time = omp_get_wtime() - start_time;
-
     img_save(out_path, data, width, height, n_channels);
-
-    print_details(n_pixels, n_channels, n_clusts, n_threads, exec_time, sse, n_iters);
+    print_details(n_pixels, n_channels, n_clusts, n_threads, n_iters, sse, exec_time);
 
     free(data);
 
@@ -96,7 +94,7 @@ int main(int argc, char **argv)
 }
 
 void print_details(int n_pixels, int n_channels, int n_clusts, int n_threads,
-                   double exec_time, double sse, int n_iters)
+                   int n_iters, double sse, double exec_time)
 {
     char *details = "EXECUTION DETAILS\n"
         "-------------------------------------------------------\n"
@@ -104,11 +102,11 @@ void print_details(int n_pixels, int n_channels, int n_clusts, int n_threads,
         "  Number of channels    : %d\n"
         "  Number of clusters    : %d\n"
         "  Number of threads     : %d\n"
-        "  Execution time        : %f\n"
+        "  Number of iterations  : %d\n"
         "  Sum of Squared Errors : %f\n"
-        "  Number of iterations  : %d\n";
+        "  Execution time        : %f\n";
 
-    fprintf(stdout, details, n_pixels, n_channels, n_clusts, n_threads, exec_time, sse, n_iters);
+    fprintf(stdout, details, n_pixels, n_channels, n_clusts, n_threads, n_iters, sse, exec_time);
 }
 
 void print_usage(char *pgr_name)
