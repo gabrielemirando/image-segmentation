@@ -113,13 +113,15 @@ void print_details(int n_pixels, int n_channels, int n_clusts, int n_threads,
 
 void print_usage(char *pgr_name)
 {
-    char *usage = "USAGE \n\n"
+    char *usage = "PROGRAM USAGE \n\n"
         "   %s [-h] [-k num_clusters] [-m max_iters] [-o output_img] \n"
         "             [-s seed] [-t num_threads] input_image \n\n"
         "   The input image filepath is the only mandatory argument and \n"
         "   must be specified last, after all the optional parameters. \n"
         "   Valid input image formats are JPEG, PNG, BMP, GIF, TGA, PSD, \n"
-        "   PIC, HDR and PNM. \n\n"
+        "   PIC, HDR and PNM. The program performs a color-based segmentation\n"
+        "   of the input image using a parallel version the k-means \n"
+        "   clustering algorithm implemented through OpenMP. \n\n"
         "OPTIONAL PARAMETERS \n\n"
         "   -k num_clusters : number of clusters to use for the segmentation of \n"
         "                     the image. Must be bigger than 1. Default is %d. \n"
