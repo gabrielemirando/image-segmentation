@@ -1,3 +1,14 @@
+/*
+ * Name:   main_omp.c
+ * Author: Gabriele Mirando
+ * --------------------
+ * This file contains the main function for the parallel implementation of the
+ * k-means color-based segmentation using OpenMP. It's basically a copy of
+ * main_serial.c, with the exception that an optional parameter indicating the
+ * number of threads can be specified in the command line when launching the
+ * program.
+ */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -13,9 +24,7 @@
 #define DEFAULT_OUT_PATH "result.jpg"
 
 void print_usage(char *pgr_name);
-
-void print_details(int n_pixels, int n_channels, int n_clusts, int n_threads,
-                   int n_iters, double sse, double exec_time);
+void print_details(int n_pixels, int n_channels, int n_clusts, int n_threads, int n_iters, double sse, double exec_time);
 
 int main(int argc, char **argv)
 {
@@ -29,6 +38,8 @@ int main(int argc, char **argv)
     int n_threads = DEFAULT_N_THREADS;
     int seed = time(NULL);
     double sse, start_time, exec_time;
+
+    // PARSING ARGUMENTS AND OPTIONAL PARAMETERS
 
     char optchar;
     while ((optchar = getopt(argc, argv, "k:m:o:s:t:h")) != -1) {
@@ -58,6 +69,8 @@ int main(int argc, char **argv)
 
     in_path = argv[optind];
 
+    // VALIDATING INPUT PARAMETERS
+
     if (in_path == NULL) {
         print_usage(argv[0]);
         exit(EXIT_FAILURE);
@@ -80,33 +93,25 @@ int main(int argc, char **argv)
 
     srand(seed);
 
+    // SCANNING INPUT IMAGE
+
     data = img_load(in_path, &width, &height, &n_channels);
     n_pixels = width * height;
+
+    // EXECUTING KMEANS SEGMENTATION
+
     start_time = omp_get_wtime();
     kmeans_segm_omp(data, n_pixels, n_channels, n_clusts, &n_iters, &sse, n_threads);
     exec_time = omp_get_wtime() - start_time;
+
+    // SAVING AND PRINTING RESULTS
+
     img_save(out_path, data, width, height, n_channels);
     print_details(n_pixels, n_channels, n_clusts, n_threads, n_iters, sse, exec_time);
 
     free(data);
 
     return EXIT_SUCCESS;
-}
-
-void print_details(int n_pixels, int n_channels, int n_clusts, int n_threads,
-                   int n_iters, double sse, double exec_time)
-{
-    char *details = "EXECUTION DETAILS\n"
-        "-------------------------------------------------------\n"
-        "  Number of pixels      : %d\n"
-        "  Number of channels    : %d\n"
-        "  Number of clusters    : %d\n"
-        "  Number of threads     : %d\n"
-        "  Number of iterations  : %d\n"
-        "  Sum of Squared Errors : %f\n"
-        "  Execution time        : %f\n";
-
-    fprintf(stdout, details, n_pixels, n_channels, n_clusts, n_threads, n_iters, sse, exec_time);
 }
 
 void print_usage(char *pgr_name)
@@ -139,4 +144,19 @@ void print_usage(char *pgr_name)
         "   -h              : print usage information. \n";
 
     fprintf(stderr, usage, pgr_name, DEFAULT_N_CLUSTS, DEFAULT_MAX_ITERS, DEFAULT_N_THREADS);
+}
+
+void print_details(int n_pixels, int n_channels, int n_clusts, int n_threads, int n_iters, double sse, double exec_time)
+{
+    char *details = "EXECUTION DETAILS\n"
+        "-------------------------------------------------------\n"
+        "  Number of pixels      : %d\n"
+        "  Number of channels    : %d\n"
+        "  Number of clusters    : %d\n"
+        "  Number of threads     : %d\n"
+        "  Number of iterations  : %d\n"
+        "  Sum of Squared Errors : %f\n"
+        "  Execution time        : %f\n";
+
+    fprintf(stdout, details, n_pixels, n_channels, n_clusts, n_threads, n_iters, sse, exec_time);
 }

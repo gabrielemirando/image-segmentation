@@ -1,3 +1,10 @@
+/*
+ * Name:   image_io.h
+ * Author: Gabriele Mirando
+ * --------------------
+ * Header file containing the declarations of the functions defined in image_io.c
+ */
+
 #ifndef IMAGE_IO_H
 #define IMAGE_IO_H
 
@@ -14,13 +21,12 @@ typedef unsigned char byte_t;
 /*
  * Function:  img_load
  * --------------------
- * Opens an image and loads the values of its pixels.
+ * Opens an image and loads the values of its pixels into an array.
  *
  *  img_file:   path of the image to open
  *  width:      will contain the width of the image
  *  height:     will contain the height of the image
- *  n_channels: will contain the number of color channels
- *              of the image
+ *  n_channels: will contain the number of color channels of the image
  *
  *  returns:    an array allocated in memory containing the values
  *              of each color channel for all the pixels of the image.
@@ -32,9 +38,8 @@ byte_t *img_load(char *img_file, int *width, int *height, int *n_channels);
  * --------------------
  * Creates a new image file using the pixels values provided.
  *
- *  img_file:   path of the image to create
- *  data:       array containing the values of each color
- *              channel for all the pixels of the image
+ *  img_file:   filepath of the image to create
+ *  data:       array containing the color values for all the pixels of the image
  *  width:      width of the image
  *  height:     height of the image
  *  n_channels: number of color channels of the image
