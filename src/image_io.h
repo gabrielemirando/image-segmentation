@@ -1,8 +1,7 @@
 /*
- * Name:   image_io.h
- * Author: Gabriele Mirando
+ * File: image_io.h
  * --------------------
- * Header file containing the declarations of the functions defined in image_io.c
+ * Headers file containing the declarations of the functions defined in image_io.c
  */
 
 #ifndef IMAGE_IO_H
@@ -19,30 +18,30 @@
 typedef unsigned char byte_t;
 
 /*
- * Function:  img_load
+ * Function: img_load
  * --------------------
  * Opens an image and loads the values of its pixels into an array.
  *
- *  img_file:   path of the image to open
- *  width:      will contain the width of the image
- *  height:     will contain the height of the image
- *  n_channels: will contain the number of color channels of the image
+ *  char *img_file    -- filepath of the image to open
+ *  int  *width       -- outputs the width of the image in pixels
+ *  int  *height      -- outputs the height of the image in pixels
+ *  int  *n_channels  -- outputs the number of color components of the image
  *
- *  returns:    an array allocated in memory containing the values
- *              of each color channel for all the pixels of the image.
+ *  return byte_t*    -- an array allocated in memory containing the values
+ *                       of each color channel for all the pixels of the image
  */
 byte_t *img_load(char *img_file, int *width, int *height, int *n_channels);
 
 /*
- * Function:  img_save
+ * Function: img_save
  * --------------------
  * Creates a new image file using the pixels values provided.
  *
- *  img_file:   filepath of the image to create
- *  data:       array containing the color values for all the pixels of the image
- *  width:      width of the image
- *  height:     height of the image
- *  n_channels: number of color channels of the image
+ *  char   *img_file   -- filepath of the image to create
+ *  byte_t *data       -- array containing the color values for the pixels
+ *  int    width       -- width of the image in pixels
+ *  int    height      -- height of the image in pixels
+ *  int    n_channels  -- number of color components of the image
  */
 void img_save(char *img_file, byte_t *data, int width, int height, int n_channels);
 

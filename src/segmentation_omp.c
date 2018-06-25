@@ -1,3 +1,10 @@
+/*
+ * File: segmentation_omp.c
+ * --------------------
+ * Contains the OpenMP parallel implementation of color-based segmentation using
+ * k-means clustering algorithm.
+ */
+
 #include <stdlib.h>
 #include <float.h>
 #include <math.h>

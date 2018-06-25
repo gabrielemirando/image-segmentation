@@ -1,8 +1,7 @@
 /*
- * Name:   main_omp.c
- * Author: Gabriele Mirando
+ * File:   main_omp.c
  * --------------------
- * This file contains the main function for the parallel implementation of the
+ * Contains the main function for the parallel implementation of the
  * k-means color-based segmentation using OpenMP. It's basically a copy of
  * main_serial.c, with the exception that an optional parameter indicating the
  * number of threads can be specified in the command line when launching the

@@ -1,11 +1,10 @@
 /*
- * Name:   main_serial.c
- * Author: Gabriele Mirando
+ * File: main_serial.c
  * --------------------
- * This file contains the main function for the serial implementation of the
+ * Contains the main function for the serial implementation of the
  * k-means color-based segmentation. It defines the flow of the program. It
- * handles arguments and optional parameters and the printing of the results
- * and of the usage message.
+ * handles arguments and optional parameters as well as the printing of results
+ * and usage message.
  */
 
 #include <stdlib.h>

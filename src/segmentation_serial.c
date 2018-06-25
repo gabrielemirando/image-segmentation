@@ -1,28 +1,25 @@
+/*
+ * File: segmentation_serial.c
+ * --------------------
+ * Contains the serial implementation of color-based segmentation using
+ * k-means clustering algorithm.
+ */
+
 #include <stdlib.h>
 #include <float.h>
 #include <math.h>
-#include <omp.h>
 
 #include "image_io.h"
 #include "segmentation.h"
 
-void init_centers(byte_t *data, double *centers, int n_pixels, int n_channels,
-                  int n_clusts);
-
-int closest_clust(byte_t *pixel, double *centers, int n_channels, int n_clusts,
-                  double *clust_dist);
-
+void init_centers(byte_t *data, double *centers, int n_pixels, int n_channels, int n_clusts);
+int closest_clust(byte_t *pixel, double *centers, int n_channels, int n_clusts, double *clust_dist);
 double sqr_dist(byte_t *pixel, double *center, int n_channels);
-
 int farthest_pixel(double *dists, int n_pixels);
-
 double sum_sqr_error(double *dists, int n_pixels);
+void update_data(byte_t *data, double *centers, int *labels, int n_pixels, int n_channels, int k_size);
 
-void update_data(byte_t *data, double *centers, int *labels, int n_pixels,
-                 int n_channels, int k_size);
-
-void kmeans_segm(byte_t *data, int n_pixels, int n_channels, int n_clusts,
-                 int *n_iters, double *sse)
+void kmeans_segm(byte_t *data, int n_pixels, int n_channels, int n_clusts, int *n_iters, double *sse)
 {
     int px, ch, k, j;
     int px_off, k_off, k_size;
@@ -109,8 +106,7 @@ void kmeans_segm(byte_t *data, int n_pixels, int n_channels, int n_clusts,
     free(dists);
 }
 
-void init_centers(byte_t *data, double *centers, int n_pixels, int n_channels,
-                  int n_clusts)
+void init_centers(byte_t *data, double *centers, int n_pixels, int n_channels, int n_clusts)
 {
     int k, ch, rnd;
     int k_off, rnd_off;
@@ -126,8 +122,7 @@ void init_centers(byte_t *data, double *centers, int n_pixels, int n_channels,
     }
 }
 
-int closest_clust(byte_t *pixel, double *centers, int n_channels, int n_clusts,
-                  double *clust_dist)
+int closest_clust(byte_t *pixel, double *centers, int n_channels, int n_clusts, double *clust_dist)
 {
     int k, min_k;
     double dist, min_dist;
@@ -187,8 +182,7 @@ double sum_sqr_error(double *dists, int n_pixels)
     return sse;
 }
 
-void update_data(byte_t *data, double *centers, int *labels, int n_pixels,
-                 int n_channels, int k_size)
+void update_data(byte_t *data, double *centers, int *labels, int n_pixels, int n_channels, int k_size)
 {
     int px, ch, j;
     int px_off, k_off;

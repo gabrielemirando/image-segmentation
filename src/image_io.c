@@ -1,9 +1,8 @@
 /*
- * Name:   image_io.c
- * Author: Gabriele Mirando
+ * File: image_io.c
  * --------------------
- * This file contains the functions for handling image I/O. It is
- * just a "wrapper" for the stb_image.h and stb_image_write.h libraries.
+ * Contains the functions for handling image I/O. It is just a "wrapper"
+ * for the stb_image.h and stb_image_write.h libraries.
  */
 
 #include <stdio.h>
