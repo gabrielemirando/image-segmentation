@@ -1,10 +1,10 @@
 /*
  * File: main_serial.c
  * --------------------
- * Contains the main function for the serial implementation of the
- * k-means color-based segmentation. It defines the flow of the program. It
- * handles arguments and optional parameters as well as the printing of results
- * and usage message.
+ * This file contains the main function that defines the flow of the serial
+ * version of program. It handles the arguments and optional parameters that 
+ * can be specified by command line when launching the program, and takes care
+ * of printing the results of the execution and, eventually, the usage message.
  */
 
 #include <stdlib.h>

@@ -1,12 +1,12 @@
 /*
  * File: segmentation_serial.c
  * --------------------
- * Contains the serial implementation of color-based segmentation using
- * k-means clustering algorithm.
+ * This file represents the core of the program. It contains the serial
+ * implementation of color-based segmentation using k-means clustering algorithm.
  *
  * MATRICES DISCLAIMER
  *
- * In this program, matrices have been implemented using unidimensional array.
+ * In this program, matrices have been implemented using unidimensional arrays.
  * According to this practice, a matrix of N rows and M columns is stored using
  * an array of size N * M. To get the (i,j) element of the matrix, we'll need to
  * access the [i * M + j] index of the array (since row-major ordering has been
@@ -14,8 +14,8 @@
  * and the access to the elements of the matrix is fast, but may result
  * complicated in terms of code readability. In presence of loops, temporary
  * buffers have been used to reduce the number of multiplications to do to
- * access the matrix elements. In the comments, unidimensional arrays used as
- * matrices are directly referred as matrices.
+ * compute the  corresponding array indexes. In the comments, unidimensional
+ * arrays used as matrices are directly referred as matrices.
  */
 
 #include <stdlib.h>
@@ -35,11 +35,11 @@ void update_data(byte_t *data, double *centers, int *labels, int n_pixels, int n
 /*
  * Function:  kmeans_segm
  * --------------------
- * Performs color-based segmentation on the image data using the standard
+ * Performs color-based segmentation on the image data using the serial version
  * k-means clustering algorithm.
  *
- *  byte_t *data      --  matrix containing the values of pixels of the initial image,
- *                        outputs the values of the pixel after the segmentation
+ *  byte_t *data      --  matrix containing the color values of the pixels of the image,
+ *                        outputs the color values of the pixel after the segmentation
  *  int    n_pixels   --  number of pixels of the image
  *  int    n_channels --  number of color components of the image
  *  int    n_clusts   --  number of clusters to use for the segmentation
@@ -56,7 +56,7 @@ void kmeans_segm(byte_t *data, int n_pixels, int n_channels, int n_clusts, int *
     int changes;         // flag for changes in the pixels assigment to clusters
     int min_k;           // buffer of the index of the cluster closest to a pixel
     int far_px;          // buffer of the index of the pixel farthest from its cluster center
-    int *labels;         // clusters to which each pixel belongs
+    int *labels;         // indexes of the clusters to which each pixel belongs
     double *centers;     // matrix of the clusters centers
     int k_size;          // size of the clusters centers "array"
     double *dists;       // distances of each pixel from the center of the cluster they belong
@@ -157,7 +157,7 @@ void kmeans_segm(byte_t *data, int n_pixels, int n_channels, int n_clusts, int *
  * --------------------
  * Initialize the clusters centers with randomly selected pixels from the dataset.
  *
- *  byte_t *data       -- matrix of the pixels of the image
+ *  byte_t *data       -- matrix containing the color values of the pixels of the image
  *  double *centers    -- matrix of the clusters centers
  *  int    n_pixels    -- number of pixels of the image
  *  int    n_channels  -- number of color components of the image
@@ -296,9 +296,9 @@ double sum_sqr_errors(double *dists, int n_pixels)
  * color-based segmentation using kmeans. The values of each pixel are replaced
  * with the ones of center of the cluster to which the pixel belongs.
  *
- *  byte_t *data       -- matrix of the pixels of the image
+ *  byte_t *data       -- matrix containing the color values of the pixels of the image
  *  double *centers    -- matrix of the clusters centers
- *  int    *labels     -- clusters to which each pixel belongs
+ *  int    *labels     -- indexes of the cluster to which each pixel belongs
  *  int    n_pixels    -- number of pixels of the image
  *  int    n_channels  -- number of color components of the image
  *  int    k_size      -- size of the clusters centers "array"

@@ -1,11 +1,10 @@
 /*
  * File:   main_omp.c
  * --------------------
- * Contains the main function for the parallel implementation of the
- * k-means color-based segmentation using OpenMP. It's basically a copy of
- * main_serial.c, with the exception that an optional parameter indicating the
- * number of threads can be specified in the command line when launching the
- * program.
+ * This file contains the main function that defines the flow of the parallel
+ * version of program. It's basically a copy of main_serial.c, with the exception
+ * that  for this version an optional parameter indicating the number of threads
+ * can be specified in the command line when launching the program.
  */
 
 #include <stdlib.h>

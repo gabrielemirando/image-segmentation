@@ -10,10 +10,10 @@
 /*
  * Type Definition: byte_t
  * --------------------
- * The intensity of each channel (red, green, blue or gray) of a pixel is a
- * value from 0 to 255. One byte of memory is sufficient to store it and
- * that's why 'unsigned char' type is used. For convenience 'unsigned char'
- * is renamed to 'byte_t'.
+ * The intensity of each color channel (red, green, blue or gray) of a pixel
+ * is a value from 0 to 255. One byte of memory is sufficient to store it and
+ * that's why "unsigned char" type is used. For convenience "unsigned char"
+ * is renamed to "byte_t".
  */
 typedef unsigned char byte_t;
 

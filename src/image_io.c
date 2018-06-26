@@ -1,8 +1,8 @@
 /*
  * File: image_io.c
  * --------------------
- * Contains the functions for handling image I/O. It is just a "wrapper"
- * for the stb_image.h and stb_image_write.h libraries.
+ * This file contains the functions for handling image iput/output. It is basically
+ * just a "wrapper" for the stb_image.h and stb_image_write.h libraries.
  */
 
 #include <stdio.h>
@@ -19,7 +19,7 @@
 /*
  * Function: img_load
  * --------------------
- * Opens an image and loads the values of its pixels into a matrix.
+ * Opens an image and loads the color values of its pixels into a matrix.
  *
  *  char *img_file    -- filepath of the image to open
  *  int  *width       -- outputs the width of the image in pixels
