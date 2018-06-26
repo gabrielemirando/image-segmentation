@@ -22,7 +22,7 @@
 #define DEFAULT_OUT_PATH "result.jpg"
 
 void print_usage(char *pgr_name);
-void print_details(int n_pixels, int n_channels, int n_clusts, int n_threads, int n_iters, double sse, double exec_time);
+void print_details(int n_px, int n_ch, int n_clus, int n_threads, int n_iters, double sse, double exec_time);
 
 int main(int argc, char **argv)
 {
@@ -30,8 +30,8 @@ int main(int argc, char **argv)
     char *out_path = DEFAULT_OUT_PATH;
     byte_t *data;
     int width, height;
-    int n_pixels, n_channels;
-    int n_clusts = DEFAULT_N_CLUSTS;
+    int n_px, n_ch;
+    int n_clus = DEFAULT_N_CLUSTS;
     int n_iters = DEFAULT_MAX_ITERS;
     int n_threads = DEFAULT_N_THREADS;
     int seed = time(NULL);
@@ -43,7 +43,7 @@ int main(int argc, char **argv)
     while ((optchar = getopt(argc, argv, "k:m:o:s:t:h")) != -1) {
         switch (optchar) {
             case 'k':
-                n_clusts = strtol(optarg, NULL, 10);
+                n_clus = strtol(optarg, NULL, 10);
                 break;
             case 'm':
                 n_iters = strtol(optarg, NULL, 10);
@@ -74,7 +74,7 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    if (n_clusts < 2) {
+    if (n_clus < 2) {
         fprintf(stderr, "INPUT ERROR: << Invalid number of clusters >> \n");
         exit(EXIT_FAILURE);
     }
@@ -93,19 +93,19 @@ int main(int argc, char **argv)
 
     // SCANNING INPUT IMAGE
 
-    data = img_load(in_path, &width, &height, &n_channels);
-    n_pixels = width * height;
+    data = img_load(in_path, &width, &height, &n_ch);
+    n_px = width * height;
 
     // EXECUTING KMEANS SEGMENTATION
 
     start_time = omp_get_wtime();
-    kmeans_segm_omp(data, n_pixels, n_channels, n_clusts, &n_iters, &sse, n_threads);
+    kmeans_segm_omp(data, n_px, n_ch, n_clus, &n_iters, &sse, n_threads);
     exec_time = omp_get_wtime() - start_time;
 
     // SAVING AND PRINTING RESULTS
 
-    img_save(out_path, data, width, height, n_channels);
-    print_details(n_pixels, n_channels, n_clusts, n_threads, n_iters, sse, exec_time);
+    img_save(out_path, data, width, height, n_ch);
+    print_details(n_px, n_ch, n_clus, n_threads, n_iters, sse, exec_time);
 
     free(data);
 
@@ -144,7 +144,7 @@ void print_usage(char *pgr_name)
     fprintf(stderr, usage, pgr_name, DEFAULT_N_CLUSTS, DEFAULT_MAX_ITERS, DEFAULT_N_THREADS);
 }
 
-void print_details(int n_pixels, int n_channels, int n_clusts, int n_threads, int n_iters, double sse, double exec_time)
+void print_details(int n_px, int n_ch, int n_clus, int n_threads, int n_iters, double sse, double exec_time)
 {
     char *details = "EXECUTION DETAILS\n"
         "-------------------------------------------------------\n"
@@ -156,5 +156,5 @@ void print_details(int n_pixels, int n_channels, int n_clusts, int n_threads, in
         "  Sum of Squared Errors : %f\n"
         "  Execution time        : %f\n";
 
-    fprintf(stdout, details, n_pixels, n_channels, n_clusts, n_threads, n_iters, sse, exec_time);
+    fprintf(stdout, details, n_px, n_ch, n_clus, n_threads, n_iters, sse, exec_time);
 }

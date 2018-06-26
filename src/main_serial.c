@@ -2,7 +2,7 @@
  * File: main_serial.c
  * --------------------
  * This file contains the main function that defines the flow of the serial
- * version of program. It handles the arguments and optional parameters that 
+ * version of program. It handles the arguments and optional parameters that
  * can be specified by command line when launching the program, and takes care
  * of printing the results of the execution and, eventually, the usage message.
  */
@@ -16,12 +16,12 @@
 #include "image_io.h"
 #include "segmentation.h"
 
-#define DEFAULT_N_CLUSTS 4
+#define DEFAULT_N_CLUS 4
 #define DEFAULT_MAX_ITERS 150
 #define DEFAULT_OUT_PATH "result.jpg"
 
 void print_usage(char *pgr_name);
-void print_details(int n_pixels, int n_channels, int n_clusts, int n_iters, double sse, double exec_time);
+void print_details(int n_px, int n_ch, int n_clus, int n_iters, double sse, double exec_time);
 
 int main(int argc, char **argv)
 {
@@ -29,8 +29,8 @@ int main(int argc, char **argv)
     char *out_path = DEFAULT_OUT_PATH;
     byte_t *data;
     int width, height;
-    int n_pixels, n_channels;
-    int n_clusts = DEFAULT_N_CLUSTS;
+    int n_px, n_ch;
+    int n_clus = DEFAULT_N_CLUS;
     int n_iters = DEFAULT_MAX_ITERS;
     int seed = time(NULL);
     double sse, start_time, exec_time;
@@ -41,7 +41,7 @@ int main(int argc, char **argv)
     while ((optchar = getopt(argc, argv, "k:m:o:s:h")) != -1) {
         switch (optchar) {
             case 'k':
-                n_clusts = strtol(optarg, NULL, 10);
+                n_clus = strtol(optarg, NULL, 10);
                 break;
             case 'm':
                 n_iters = strtol(optarg, NULL, 10);
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    if (n_clusts < 2) {
+    if (n_clus < 2) {
         fprintf(stderr, "INPUT ERROR: << Invalid number of clusters >> \n");
         exit(EXIT_FAILURE);
     }
@@ -83,19 +83,19 @@ int main(int argc, char **argv)
 
     // SCANNING INPUT IMAGE
 
-    data = img_load(in_path, &width, &height, &n_channels);
-    n_pixels = width * height;
+    data = img_load(in_path, &width, &height, &n_ch);
+    n_px = width * height;
 
     // EXECUTING KMEANS SEGMENTATION
 
     start_time = omp_get_wtime();
-    kmeans_segm(data, n_pixels, n_channels, n_clusts, &n_iters, &sse);
+    kmeans_segm(data, n_px, n_ch, n_clus, &n_iters, &sse);
     exec_time = omp_get_wtime() - start_time;
 
     // SAVING AND PRINTING RESULTS
 
-    img_save(out_path, data, width, height, n_channels);
-    print_details(n_pixels, n_channels, n_clusts, n_iters, sse, exec_time);
+    img_save(out_path, data, width, height, n_ch);
+    print_details(n_px, n_ch, n_clus, n_iters, sse, exec_time);
 
     free(data);
 
@@ -128,10 +128,10 @@ void print_usage(char *pgr_name)
         "                     seed is specified. \n"
         "   -h              : print usage information. \n";
 
-    fprintf(stderr, usage, pgr_name, DEFAULT_N_CLUSTS, DEFAULT_MAX_ITERS);
+    fprintf(stderr, usage, pgr_name, DEFAULT_N_CLUS, DEFAULT_MAX_ITERS);
 }
 
-void print_details(int n_pixels, int n_channels, int n_clusts, int n_iters, double sse, double exec_time)
+void print_details(int n_px, int n_ch, int n_clus, int n_iters, double sse, double exec_time)
 {
     char *details = "EXECUTION DETAILS\n"
         "-------------------------------------------------------\n"
@@ -142,5 +142,5 @@ void print_details(int n_pixels, int n_channels, int n_clusts, int n_iters, doub
         "  Sum of Squared Errors : %f\n"
         "  Execution time        : %f\n";
 
-    fprintf(stdout, details, n_pixels, n_channels, n_clusts, n_iters, sse, exec_time);
+    fprintf(stdout, details, n_px, n_ch, n_clus, n_iters, sse, exec_time);
 }
