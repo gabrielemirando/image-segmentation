@@ -26,8 +26,8 @@
 void init_centers(byte_t *data, double *centers, int n_px, int n_ch, int n_clus);
 int assign_pixels(byte_t *data, double *centers, int *labels, double *dists, int n_px, int n_ch, int n_clus);
 void update_centers(byte_t *data, double *centers, int *labels, double *dists, int n_px, int n_ch, int n_clus);
-double compute_sse(double *dists, int n_px);
 void update_data(byte_t *data, double *centers, int *labels, int n_px, int n_ch);
+double compute_sse(double *dists, int n_px);
 
 /*
  * Function:  kmeans_segm
@@ -70,11 +70,11 @@ void kmeans_segm(byte_t *data, int n_px, int n_ch, int n_clus, int *n_iters, dou
         update_centers(data, centers, labels, dists, n_px, n_ch, n_clus);
     }
 
-    *n_iters = iter;
+    update_data(data, centers, labels, n_px, n_ch);
 
     *sse = compute_sse(dists, n_px);
 
-    update_data(data, centers, labels, n_px, n_ch);
+    *n_iters = iter;
 
     free(centers);
     free(labels);
@@ -108,7 +108,9 @@ void init_centers(byte_t *data, double *centers, int n_px, int n_ch, int n_clus)
 /*
  * Function:  assign_pixels
  * --------------------
- * Assign each pixel to the closest cluster.
+ * Assign each pixel to the closest cluster. For each pixel, the squared
+ * Euclidean distance to all the clusters centers is computed. The pixel is then
+ * assigned to the cluster for the squared Euclidean distance is the smallest.
  *
  *  byte_t *data    --  matrix containing the color values of the pixels of the image
  *  double *centers --  matrix of the clusters centers
@@ -125,7 +127,7 @@ int assign_pixels(byte_t *data, double *centers, int *labels, double *dists, int
 {
     int px, ch, k;
     int min_k, changes = 0;
-    double dist, min_dist;
+    double dist, min_dist, tmp;
 
     for (px = 0; px < n_px; px++) {
         min_dist = DBL_MAX;
@@ -134,7 +136,8 @@ int assign_pixels(byte_t *data, double *centers, int *labels, double *dists, int
             dist = 0;
 
             for (ch = 0; ch < n_ch; ch++) {
-                dist += pow((double)(data[px * n_ch + ch] - centers[k * n_ch + ch]), 2);
+                tmp = (double)(data[px * n_ch + ch] - centers[k * n_ch + ch]);
+                dist += tmp * tmp;
             }
 
             if (dist < min_dist) {
@@ -158,10 +161,11 @@ int assign_pixels(byte_t *data, double *centers, int *labels, double *dists, int
  * Function:  update_centers
  * --------------------
  * Update the the values of the clusters centers, by computing the mean of the
- * pixel objects belonging to each cluster.
+ * pixel objects belonging to each cluster. If a cluster is empty, its center is
+ * set to the pixel which is farthest from its cluster center.
  *
  *  byte_t *data    --  matrix containing the color values of the pixels of the image
- *  double *centers --  matrix of the clusters centers
+ *  double *centers --  matrix of the clusters centers, outputs the updated centers
  *  int    *labels  --  indexes of the clusters to which each pixel belongs
  *  double *dists   --  distances of each pixel from their cluster center
  *  int    n_px     --  number of pixels of the image
@@ -201,6 +205,7 @@ void update_centers(byte_t *data, double *centers, int *labels, double *dists, i
                 centers[k * n_ch + ch] /= counts[k];
             }
         } else {
+            // If the cluster is empty we find the farthest pixel from its cluster center
             max_dist = 0;
             for (px = 0; px < n_px; px++) {
                 if (dists[px] > max_dist) {
@@ -218,28 +223,6 @@ void update_centers(byte_t *data, double *centers, int *labels, double *dists, i
     }
 
     free(counts);
-}
-
-/*
- * Function: compute_sse
- * --------------------
- * Computes the Sum of Squared Errors of the final cluster configuration.
- *
- *  double *dists  -- array of the distances of each pixel from its cluster center
- *  int    n_px    -- number of pixels of the image
- *
- *  return double  -- sum of squared rrrors
- */
-double compute_sse(double *dists, int n_px)
-{
-    int px;
-    double sse = 0;
-
-    for (px = 0; px < n_px; px++) {
-        sse += dists[px];
-    }
-
-    return sse;
 }
 
 /*
@@ -266,4 +249,26 @@ void update_data(byte_t *data, double *centers, int *labels, int n_px, int n_ch)
             data[px * n_ch + ch] = (byte_t)round(centers[min_k * n_ch + ch]);
         }
     }
+}
+
+/*
+ * Function: compute_sse
+ * --------------------
+ * Computes the Sum of Squared Errors of the final cluster configuration.
+ *
+ *  double *dists  -- array of the distances of each pixel from its cluster center
+ *  int    n_px    -- number of pixels of the image
+ *
+ *  return double  -- sum of squared rrrors
+ */
+double compute_sse(double *dists, int n_px)
+{
+    int px;
+    double sse = 0;
+
+    for (px = 0; px < n_px; px++) {
+        sse += dists[px];
+    }
+
+    return sse;
 }

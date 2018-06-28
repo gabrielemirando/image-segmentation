@@ -24,12 +24,12 @@
 #include "image_io.h"
 #include "segmentation.h"
 
-void initialize_centers(byte_t *data, double *centers, int n_px, int n_ch, int n_clus);
-int find_closest(byte_t *pixel, double *centers, int n_ch, int n_clus, double *dist);
-double sqr_distance(byte_t *pixel, double *center, int n_ch);
-int find_farthest(double *dists, int n_px);
-double sum_sqr_errors(double *dists, int n_px);
+void init_centers(byte_t *data, double *centers, int n_px, int n_ch, int n_clus);
+int assign_pixels(byte_t *data, double *centers, int *labels, double *dists, int n_px, int n_ch, int n_clus);
+void update_centers(byte_t *data, double *centers, int *labels, double *dists, int n_px, int n_ch, int n_clus);
 void update_data(byte_t *data, double *centers, int *labels, int n_px, int n_ch);
+double compute_sse(double *dists, int n_px);
+
 
 /*
  * Function:  kmeans_segm_omp
@@ -49,92 +49,40 @@ void update_data(byte_t *data, double *centers, int *labels, int n_px, int n_ch)
  */
 void kmeans_segm_omp(byte_t *data, int n_px, int n_ch, int n_clus, int *n_iters, double *sse, int n_threads)
 {
-    int px, ch, k;
-    int iter, max_iters, changes;
-    int min_k, far_px;
-    int *labels;     // indexes of the clusters to which each pixel belongs
-    int *counts;     // number of pixels belonging to each cluster
-    double *centers; // matrix of the clusters centers
-    double *dists;   // distances of each pixel from the center of the cluster they belong
+    int iter, max_iters;
+    int changes;
+    int *labels;
+    double *centers;
+    double *dists;
 
     max_iters = *n_iters;
 
     labels = malloc(n_px * sizeof(int));
-    counts = malloc(n_clus * sizeof(int));
     centers = malloc(n_clus * n_ch * sizeof(double));
     dists = malloc(n_px * sizeof(double));
 
     omp_set_num_threads(n_threads);
 
-    initialize_centers(data, centers, n_px, n_ch, n_clus);
+    init_centers(data, centers, n_px, n_ch, n_clus);
 
     for (iter = 0; iter < max_iters; iter++) {
-        changes = 0;
-
-        // ASSIGN EACH PIXEL TO ITS CLOSEST CLUSTER
-
-        #pragma omp parallel for schedule(static) private(px, min_k)
-        for (px = 0; px < n_px; px++) {
-            min_k = find_closest(&data[px * n_ch], centers, n_ch, n_clus, &dists[px]);
-
-            if (labels[px] != min_k) {
-                labels[px] = min_k;
-                changes = 1;
-            }
-        }
-
-        // CHECKING FOR COMPLETION
+        changes = assign_pixels(data, centers, labels, dists, n_px, n_ch, n_clus);
 
         if (!changes) {
             break;
         }
 
-        // UPDATE CLUSTERS CENTERS
-
-        // Resetting centers and clusters counters
-        for (k = 0; k < n_clus; k++) {
-            counts[k] = 0;
-            for (ch = 0; ch < n_ch; ch++) {
-                centers[k * n_ch + ch] = 0;
-            }
-        }
-
-        // Computing partial sums of the centers and updating clusters counters
-        for (px = 0; px < n_px; px++) {
-            min_k = labels[px];
-            counts[min_k]++;
-            for (ch = 0; ch < n_ch; ch++) {
-                centers[min_k * n_ch + ch] += data[px * n_ch + ch];
-            }
-        }
-
-        // Dividing to obtain the centers mean
-        for (k = 0; k < n_clus; k++) {
-            if (counts[k]) {
-                for (ch = 0; ch < n_ch; ch++) {
-                    centers[k * n_ch + ch] /= counts[k];
-                }
-            } else {
-                far_px = find_farthest(dists, n_px);
-
-                for (ch = 0; ch < n_ch; ch++) {
-                    centers[k * n_ch + ch] = data[far_px * n_ch + ch];
-                }
-
-                dists[far_px] = 0;
-            }
-        }
+        update_centers(data, centers, labels, dists, n_px, n_ch, n_clus);
     }
-
-    *n_iters = iter;
-
-    *sse = sum_sqr_errors(dists, n_px);
 
     update_data(data, centers, labels, n_px, n_ch);
 
+    *sse = compute_sse(dists, n_px);
+
+    *n_iters = iter;
+
     free(centers);
     free(labels);
-    free(counts);
     free(dists);
 }
 
@@ -149,7 +97,7 @@ void kmeans_segm_omp(byte_t *data, int n_px, int n_ch, int n_clus, int *n_iters,
  *  int    n_ch      -- number of color components of the image
  *  int    n_clus    -- number of clusters to use for segmentation
  */
-void initialize_centers(byte_t *data, double *centers, int n_px, int n_ch, int n_clus)
+void init_centers(byte_t *data, double *centers, int n_px, int n_ch, int n_clus)
 {
     int k, ch, rnd;
 
@@ -163,109 +111,124 @@ void initialize_centers(byte_t *data, double *centers, int n_px, int n_ch, int n
 }
 
 /*
- * Function: find_closest
+ * Function:  assign_pixels
  * --------------------
- * For a given pixel, finds the index of the closest cluster.
+ * Assign each pixel to the closest cluster. For each pixel, the squared
+ * Euclidean distance to all the clusters centers is computed. The pixel is then
+ * assigned to the cluster for the squared Euclidean distance is the smallest.
  *
- *  byte_t *pixel    -- array of the color values of a pixel
- *  double *centers  -- matrix of the clusters centers
- *  int    n_ch      -- number of color components of the image
- *  int    n_clus    -- number of clusters used for segmentation
- *  double *dist     -- outputs the distance from the closest cluster
+ *  byte_t *data    --  matrix containing the color values of the pixels of the image
+ *  double *centers --  matrix of the clusters centers
+ *  int    *labels  --  indexes of the clusters to which each pixel belongs
+ *  double *dists   --  distances of each pixel from their cluster center
+ *  int    n_px     --  number of pixels of the image
+ *  int    n_ch     --  number of color components of the image
+ *  int    n_clus   --  number of clusters to use for the segmentation
  *
- *  return int       -- index of the closest cluster
+ *  return int      --  a value different from 0 if there were changes in the
+ *                      cluster assignments of the pixels
  */
-int find_closest(byte_t *pixel, double *centers, int n_ch, int n_clus, double *dist)
+int assign_pixels(byte_t *data, double *centers, int *labels, double *dists, int n_px, int n_ch, int n_clus)
 {
-    int k, min_k;
-    double tmp_dist, min_dist;
+    int px, ch, k;
+    int min_k, changes = 0;
+    double dist, min_dist, tmp;
 
-    min_dist = DBL_MAX;
-    for (k = 0; k < n_clus; k++) {
-        tmp_dist = sqr_distance(pixel, &centers[k * n_ch], n_ch);
-        if (tmp_dist < min_dist) {
-            min_dist = tmp_dist;
-            min_k = k;
+    #pragma omp parallel for schedule(static) private(px, ch, k, min_k, dist, min_dist, tmp)
+    for (px = 0; px < n_px; px++) {
+        min_dist = DBL_MAX;
+
+        for (k = 0; k < n_clus; k++) {
+            dist = 0;
+
+            for (ch = 0; ch < n_ch; ch++) {
+                tmp = (double)(data[px * n_ch + ch] - centers[k * n_ch + ch]);
+                dist += tmp * tmp;
+            }
+
+            if (dist < min_dist) {
+                min_dist = dist;
+                min_k = k;
+            }
+        }
+
+        dists[px] = min_dist;
+
+        if (labels[px] != min_k) {
+            labels[px] = min_k;
+            changes = 1;
         }
     }
 
-    *dist = min_dist;
-
-    return min_k;
+    return changes;
 }
 
 /*
- * Function: sqr_distance
+ * Function:  update_centers
  * --------------------
- * Computes the squared Euclidean distance between a pixel and a cluster center.
+ * Update the the values of the clusters centers, by computing the mean of the
+ * pixel objects belonging to each cluster. If a cluster is empty, its center is
+ * set to the pixel which is farthest from its cluster center.
  *
- *  byte_t *pixel   -- array of the color values of a pixel
- *  double *center  -- array of the values of a cluster center
- *  int    n_ch     -- number of color components of the image
- *
- *  return double   -- squared Euclidean distance
+ *  byte_t *data    --  matrix containing the color values of the pixels of the image
+ *  double *centers --  matrix of the clusters centers, outputs the updated centers
+ *  int    *labels  --  indexes of the clusters to which each pixel belongs
+ *  double *dists   --  distances of each pixel from their cluster center
+ *  int    n_px     --  number of pixels of the image
+ *  int    n_ch     --  number of color components of the image
+ *  int    n_clus   --  number of clusters to use for the segmentation
  */
-double sqr_distance(byte_t *pixel, double *center, int n_ch)
+void update_centers(byte_t *data, double *centers, int *labels, double *dists, int n_px, int n_ch, int n_clus)
 {
-    int ch;
-    double diff, dist = 0;
-
-    for (ch = 0; ch < n_ch; ch++) {
-        diff = (double)(pixel[ch] - center[ch]);
-        dist += diff * diff;
-    }
-
-    return dist;
-}
-
-/*
- * Function: find_farthest
- * --------------------
- * Finds the index of the pixel which is farthest from the center of the cluster
- * to which it belongs.
- *
- *  double *dists  -- distances of each pixel from the center of the cluster they belong
- *  int    n_px    -- number of pixels of the image
- *
- *  return int     -- index of the pixel which is farthest from its cluster center
- */
-int find_farthest(double *dists, int n_px)
-{
-    int px, far_px;
+    int px, ch, k;
+    int *counts;
+    int min_k, far_px;
     double max_dist;
 
-    max_dist = 0;
+    counts = malloc(n_clus * sizeof(int));
+
+    // Resetting centers and initializing clusters counters
+    for (k = 0; k < n_clus; k++) {
+        for (ch = 0; ch < n_ch; ch++) {
+            centers[k * n_ch + ch] = 0;
+        }
+        counts[k] = 0;
+    }
+
+    // Computing partial sums of the centers and updating clusters counters
     for (px = 0; px < n_px; px++) {
-        if (dists[px] > max_dist) {
-            max_dist = dists[px];
-            far_px = px;
+        min_k = labels[px];
+        for (ch = 0; ch < n_ch; ch++) {
+            centers[min_k * n_ch + ch] += data[px * n_ch + ch];
+        }
+        counts[min_k]++;
+    }
+
+    // Dividing to obtain the centers mean
+    for (k = 0; k < n_clus; k++) {
+        if (counts[k]) {
+            for (ch = 0; ch < n_ch; ch++) {
+                centers[k * n_ch + ch] /= counts[k];
+            }
+        } else {
+            // If the cluster is empty we find the farthest pixel from its cluster center
+            max_dist = 0;
+            for (px = 0; px < n_px; px++) {
+                if (dists[px] > max_dist) {
+                    max_dist = dists[px];
+                    far_px = px;
+                }
+            }
+
+            for (ch = 0; ch < n_ch; ch++) {
+                centers[k * n_ch + ch] = data[far_px * n_ch + ch];
+            }
+
+            dists[far_px] = 0;
         }
     }
 
-    return far_px;
-}
-
-/*
- * Function: sum_sqr_errors
- * --------------------
- * Computes the Sum of Squared Errors of a cluster configuration.
- *
- *  double *dists  -- array of the distances of each pixel from its cluster center
- *  int    n_px    -- number of pixels of the image
- *
- *  return double  -- sum of squared rrrors
- */
-double sum_sqr_errors(double *dists, int n_px)
-{
-    int px;
-    double sse = 0;
-
-    #pragma omp parallel for private(px) reduction(+:sse)
-    for (px = 0; px < n_px; px++) {
-        sse += dists[px];
-    }
-
-    return sse;
+    free(counts);
 }
 
 /*
@@ -280,7 +243,6 @@ double sum_sqr_errors(double *dists, int n_px)
  *  int    *labels   -- indexes of the cluster to which each pixel belongs
  *  int    n_px      -- number of pixels of the image
  *  int    n_ch      -- number of color components of the image
- *  int    k_size    -- size of the clusters centers "array"
  */
 void update_data(byte_t *data, double *centers, int *labels, int n_px, int n_ch)
 {
@@ -294,4 +256,27 @@ void update_data(byte_t *data, double *centers, int *labels, int n_px, int n_ch)
             data[px * n_ch + ch] = (byte_t)round(centers[min_k * n_ch + ch]);
         }
     }
+}
+
+/*
+ * Function: compute_sse
+ * --------------------
+ * Computes the Sum of Squared Errors of the final cluster configuration.
+ *
+ *  double *dists  -- array of the distances of each pixel from its cluster center
+ *  int    n_px    -- number of pixels of the image
+ *
+ *  return double  -- sum of squared rrrors
+ */
+double compute_sse(double *dists, int n_px)
+{
+    int px;
+    double sse = 0;
+
+    #pragma omp parallel for private(px) reduction(+:sse)
+    for (px = 0; px < n_px; px++) {
+        sse += dists[px];
+    }
+
+    return sse;
 }
