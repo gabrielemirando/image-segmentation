@@ -186,15 +186,18 @@ void update_centers(byte_t *data, double *centers, int *labels, double *dists, i
         for (ch = 0; ch < n_ch; ch++) {
             centers[k * n_ch + ch] = 0;
         }
+
         counts[k] = 0;
     }
 
     // Computing partial sums of the centers and updating clusters counters
     for (px = 0; px < n_px; px++) {
         min_k = labels[px];
+
         for (ch = 0; ch < n_ch; ch++) {
             centers[min_k * n_ch + ch] += data[px * n_ch + ch];
         }
+
         counts[min_k]++;
     }
 
@@ -207,6 +210,7 @@ void update_centers(byte_t *data, double *centers, int *labels, double *dists, i
         } else {
             // If the cluster is empty we find the farthest pixel from its cluster center
             max_dist = 0;
+
             for (px = 0; px < n_px; px++) {
                 if (dists[px] > max_dist) {
                     max_dist = dists[px];

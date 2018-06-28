@@ -1,6 +1,6 @@
 # Image segmentation
-The goal of the project is to implement color-based image segmentation using the 
-standard k-means clustering algorithm and to speed up the execution exploiting 
+The goal of the project is to implement color-based image segmentation using the
+standard k-means clustering algorithm and to speed up the execution exploiting
 different multithreading programming paradigms.
 
 ### Usage
