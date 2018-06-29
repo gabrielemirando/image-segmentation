@@ -24,10 +24,10 @@
 #include "segmentation.h"
 
 void init_centers(byte_t *data, double *centers, int n_px, int n_ch, int n_clus);
-int assign_pixels(byte_t *data, double *centers, int *labels, double *dists, int n_px, int n_ch, int n_clus);
+void assign_pixels(byte_t *data, double *centers, int *labels, double *dists, int *changes, int n_px, int n_ch, int n_clus);
 void update_centers(byte_t *data, double *centers, int *labels, double *dists, int n_px, int n_ch, int n_clus);
 void update_data(byte_t *data, double *centers, int *labels, int n_px, int n_ch);
-double compute_sse(double *dists, int n_px);
+void compute_sse(double *sse, double *dists, int n_px);
 
 /*
  * Function:  kmeans_segm
@@ -61,7 +61,7 @@ void kmeans_segm(byte_t *data, int n_px, int n_ch, int n_clus, int *n_iters, dou
     init_centers(data, centers, n_px, n_ch, n_clus);
 
     for (iter = 0; iter < max_iters; iter++) {
-        changes = assign_pixels(data, centers, labels, dists, n_px, n_ch, n_clus);
+        assign_pixels(data, centers, labels, dists, &changes, n_px, n_ch, n_clus);
 
         if (!changes) {
             break;
@@ -72,7 +72,7 @@ void kmeans_segm(byte_t *data, int n_px, int n_ch, int n_clus, int *n_iters, dou
 
     update_data(data, centers, labels, n_px, n_ch);
 
-    *sse = compute_sse(dists, n_px);
+    compute_sse(sse, dists, n_px);
 
     *n_iters = iter;
 
@@ -112,21 +112,20 @@ void init_centers(byte_t *data, double *centers, int n_px, int n_ch, int n_clus)
  * Euclidean distance to all the clusters centers is computed. The pixel is then
  * assigned to the cluster for the squared Euclidean distance is the smallest.
  *
- *  byte_t *data    --  matrix containing the color values of the pixels of the image
- *  double *centers --  matrix of the clusters centers
- *  int    *labels  --  indexes of the clusters to which each pixel belongs
- *  double *dists   --  distances of each pixel from their cluster center
- *  int    n_px     --  number of pixels of the image
- *  int    n_ch     --  number of color components of the image
- *  int    n_clus   --  number of clusters to use for the segmentation
- *
- *  return int      --  a value different from 0 if there were changes in the
- *                      cluster assignments of the pixels
+ *  byte_t *data     --  matrix containing the color values of the pixels of the image
+ *  double *centers  --  matrix of the clusters centers
+ *  int    *labels   --  indexes of the clusters to which each pixel belongs
+ *  double *dists    --  distances of each pixel from their cluster center
+ *  int    *changes  --  outputs a value different from 0 if there were changes in the
+ *                       cluster assignments of the pixels
+ *  int    n_px      --  number of pixels of the image
+ *  int    n_ch      --  number of color components of the image
+ *  int    n_clus    --  number of clusters to use for the segmentation
  */
-int assign_pixels(byte_t *data, double *centers, int *labels, double *dists, int n_px, int n_ch, int n_clus)
+void assign_pixels(byte_t *data, double *centers, int *labels, double *dists, int *changes, int n_px, int n_ch, int n_clus)
 {
     int px, ch, k;
-    int min_k, changes = 0;
+    int min_k, tmp_changes = 0;
     double dist, min_dist, tmp;
 
     for (px = 0; px < n_px; px++) {
@@ -150,11 +149,11 @@ int assign_pixels(byte_t *data, double *centers, int *labels, double *dists, int
 
         if (labels[px] != min_k) {
             labels[px] = min_k;
-            changes = 1;
+            tmp_changes = 1;
         }
     }
 
-    return changes;
+    *changes = tmp_changes;
 }
 
 /*
@@ -164,13 +163,13 @@ int assign_pixels(byte_t *data, double *centers, int *labels, double *dists, int
  * pixel objects belonging to each cluster. If a cluster is empty, its center is
  * set to the pixel which is farthest from its cluster center.
  *
- *  byte_t *data    --  matrix containing the color values of the pixels of the image
- *  double *centers --  matrix of the clusters centers, outputs the updated centers
- *  int    *labels  --  indexes of the clusters to which each pixel belongs
- *  double *dists   --  distances of each pixel from their cluster center
- *  int    n_px     --  number of pixels of the image
- *  int    n_ch     --  number of color components of the image
- *  int    n_clus   --  number of clusters to use for the segmentation
+ *  byte_t *data     --  matrix containing the color values of the pixels of the image
+ *  double *centers  --  matrix of the clusters centers, outputs the updated centers
+ *  int    *labels   --  indexes of the clusters to which each pixel belongs
+ *  double *dists    --  distances of each pixel from their cluster center
+ *  int    n_px      --  number of pixels of the image
+ *  int    n_ch      --  number of color components of the image
+ *  int    n_clus    --  number of clusters to use for the segmentation
  */
 void update_centers(byte_t *data, double *centers, int *labels, double *dists, int n_px, int n_ch, int n_clus)
 {
@@ -260,19 +259,18 @@ void update_data(byte_t *data, double *centers, int *labels, int n_px, int n_ch)
  * --------------------
  * Computes the Sum of Squared Errors of the final cluster configuration.
  *
+ *  double *sse    -- outputs the sum of squared errors
  *  double *dists  -- array of the distances of each pixel from its cluster center
  *  int    n_px    -- number of pixels of the image
- *
- *  return double  -- sum of squared rrrors
  */
-double compute_sse(double *dists, int n_px)
+void compute_sse(double *sse, double *dists, int n_px)
 {
     int px;
-    double sse = 0;
+    double res = 0;
 
     for (px = 0; px < n_px; px++) {
-        sse += dists[px];
+        res += dists[px];
     }
 
-    return sse;
+    *sse = res;
 }
