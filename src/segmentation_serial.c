@@ -37,15 +37,17 @@ void compute_sse(double *sse, double *dists, int n_px);
  *
  *  byte_t *data    --  matrix containing the color values of the pixels of the image,
  *                      outputs the color values of the pixel after the segmentation
- *  int    n_px     --  number of pixels of the image
+ *  int    width    --  width of the image in pixels
+ *  int    height   --  height of the image in pixels
  *  int    n_ch     --  number of color components of the image
  *  int    n_clus   --  number of clusters to use for the segmentation
  *  int    *n_iters --  number of maximum iterations for k-means algorithm,
  *                      outputs the numbers of iterations that took to complete
  *  double *sse     --  outputs the of sum of squared errors of k-means algorithm
  */
-void kmeans_segm(byte_t *data, int n_px, int n_ch, int n_clus, int *n_iters, double *sse)
+void kmeans_segm(byte_t *data, int width, int height, int n_ch, int n_clus, int *n_iters, double *sse)
 {
+    int n_px;
     int iter, max_iters;
     int changes;
     int *labels;
@@ -53,6 +55,8 @@ void kmeans_segm(byte_t *data, int n_px, int n_ch, int n_clus, int *n_iters, dou
     double *dists;
 
     max_iters = *n_iters;
+
+    n_px = width * height;
 
     labels = malloc(n_px * sizeof(int));
     centers = malloc(n_clus * n_ch * sizeof(double));

@@ -22,15 +22,14 @@
 #define DEFAULT_OUT_PATH "result.jpg"
 
 void print_usage(char *pgr_name);
-void print_details(int n_px, int n_ch, int n_clus, int n_threads, int n_iters, double sse, double exec_time);
+void print_details(int width, int height, int n_ch, int n_clus, int n_threads, int n_iters, double sse, double exec_time);
 
 int main(int argc, char **argv)
 {
     char *in_path = NULL;
     char *out_path = DEFAULT_OUT_PATH;
     byte_t *data;
-    int width, height;
-    int n_px, n_ch;
+    int width, height, n_ch;
     int n_clus = DEFAULT_N_CLUSTS;
     int n_iters = DEFAULT_MAX_ITERS;
     int n_threads = DEFAULT_N_THREADS;
@@ -94,18 +93,17 @@ int main(int argc, char **argv)
     // SCANNING INPUT IMAGE
 
     data = img_load(in_path, &width, &height, &n_ch);
-    n_px = width * height;
 
     // EXECUTING KMEANS SEGMENTATION
 
     start_time = omp_get_wtime();
-    kmeans_segm_omp(data, n_px, n_ch, n_clus, &n_iters, &sse, n_threads);
+    kmeans_segm_omp(data, width, height, n_ch, n_clus, &n_iters, &sse, n_threads);
     exec_time = omp_get_wtime() - start_time;
 
     // SAVING AND PRINTING RESULTS
 
     img_save(out_path, data, width, height, n_ch);
-    print_details(n_px, n_ch, n_clus, n_threads, n_iters, sse, exec_time);
+    print_details(width, height, n_ch, n_clus, n_threads, n_iters, sse, exec_time);
 
     free(data);
 
@@ -144,17 +142,17 @@ void print_usage(char *pgr_name)
     fprintf(stderr, usage, pgr_name, DEFAULT_N_CLUSTS, DEFAULT_MAX_ITERS, DEFAULT_N_THREADS);
 }
 
-void print_details(int n_px, int n_ch, int n_clus, int n_threads, int n_iters, double sse, double exec_time)
+void print_details(int width, int height, int n_ch, int n_clus, int n_threads, int n_iters, double sse, double exec_time)
 {
     char *details = "EXECUTION DETAILS\n"
         "-------------------------------------------------------\n"
-        "  Number of pixels      : %d\n"
-        "  Number of channels    : %d\n"
-        "  Number of clusters    : %d\n"
-        "  Number of threads     : %d\n"
-        "  Number of iterations  : %d\n"
-        "  Sum of Squared Errors : %f\n"
-        "  Execution time        : %f\n";
+        "  Image Size             : %d x %d\n"
+        "  Color channels         : %d\n"
+        "  Number of clusters     : %d\n"
+        "  Number of threads      : %d\n"
+        "  Number of iterations   : %d\n"
+        "  Sum of Squared Errors  : %f\n"
+        "  Execution time         : %f\n";
 
-    fprintf(stdout, details, n_px, n_ch, n_clus, n_threads, n_iters, sse, exec_time);
+    fprintf(stdout, details, width, height, n_ch, n_clus, n_threads, n_iters, sse, exec_time);
 }
