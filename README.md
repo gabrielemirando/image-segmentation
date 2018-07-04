@@ -10,7 +10,7 @@ make all
 ```
 from command line will produce three executables:
 * **serial.out**: it's the serial version of the program
-* **serial_gprof.out**: when running will produce profiling infos using gprof
+* **serial_gprof.out**: will produce profiling infos about the serial code using gprof
 * **omp.out**: it's the parallel version implemented using OpenMP
 
 The parallel version requires OpenMP 4.5, which is fully supported starting from
