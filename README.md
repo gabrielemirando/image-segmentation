@@ -1,7 +1,7 @@
 # Image segmentation
 The objective of the project was to develop a C language program for color-based 
 image segmentation using the standard k-means clustering algorithm and to speed 
-up the execution by paralleling the code using OpenMP. 
+up the execution by parallelizing the code using OpenMP. 
 
 ### Compiling
 The program can be easily compiled using the make command. Launching  
