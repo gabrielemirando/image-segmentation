@@ -11,11 +11,8 @@ The repository of the project is organized in folders:
 * **src**: contains the source code files of the program
 
 ### Compiling
-The program can be compiled using the make command. Launching  
-```
-make all
-```
-from command line will produce two executables:
+The program can be compiled using the make command. Launching ```make all``` from 
+command line will produce two executables:
 * **serial.out**: it's the serial version of the program
 * **omp.out**: it's the parallel version implemented using OpenMP
 
@@ -26,16 +23,11 @@ GCC 6.1.
 The detailed information about the program usage can be obtained by specifying
 the -h flag, when launching the program from command line. Common usages are:
 
-```
-./serial.out -k 4 imgs/horse_s.jpg
-```
-to execute the serial program with four clusters on a test image provided.
-
-```
-./omp.out -k 4 -t 4 imgs/horse_s.jpg
-```
-to execute the parallel program with four clusters on a test image provided
-using 4 CPU threads.
+* ```./serial.out -k 4 imgs/horse_s.jpg```: to execute the serial program with 
+four clusters on a test image provided.
+ 
+* ```./omp.out -k 4 -t 4 imgs/horse_s.jpg```: to execute the parallel program with 
+four clusters on a test image provided using 4 CPU threads.
 
 ### Credits
 External help have been used for handling the I/O of images.
