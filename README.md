@@ -24,16 +24,16 @@ The detailed information about the program usage can be obtained by specifying
 the -h flag, when launching the program from command line. Common usages are:
 
 * ```./serial.out -k 4 imgs/horse_s.jpg```: to execute the serial program with 
-four clusters on a test image provided.
+four clusters on a test image provided
  
 * ```./omp.out -k 4 -t 4 imgs/horse_s.jpg```: to execute the parallel program with 
-four clusters on a test image provided using 4 CPU threads.
+four clusters on a test image provided using 4 CPU threads
 
 ### Credits
 External help have been used for handling the I/O of images.
 
-* stb_image (v2.19): to load the color values of the pixels of the images.
-* stb_image_write (v1.09): to create images from pixel values.
+* stb_image (v2.19): to load the color values of the pixels of the images
+* stb_image_write (v1.09): to create images from pixel values
 
 These libraries are part of an amazing project that can be found
 [here](https://github.com/nothings/stb).
