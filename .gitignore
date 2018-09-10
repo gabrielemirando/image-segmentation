@@ -54,5 +54,8 @@ dkms.conf
 # DS Store
 .DS_Store
 
+# VSCode
+.vscode/
+
 # Results
 result.*
