@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/time.h>
 #include <omp.h>
 
 #include "image_io.h"
@@ -21,6 +22,7 @@
 #define DEFAULT_N_THREADS 2
 #define DEFAULT_OUT_PATH "result.jpg"
 
+double get_time();
 void print_usage(char *pgr_name);
 void print_details(int width, int height, int n_ch, int n_clus, int n_threads, int n_iters, double sse, double exec_time);
 
@@ -96,9 +98,9 @@ int main(int argc, char **argv)
 
     // EXECUTING KMEANS SEGMENTATION
 
-    start_time = omp_get_wtime();
+    start_time = get_time();
     kmeans_segm_omp(data, width, height, n_ch, n_clus, &n_iters, &sse, n_threads);
-    exec_time = omp_get_wtime() - start_time;
+    exec_time = get_time() - start_time;
 
     // SAVING AND PRINTING RESULTS
 
@@ -108,6 +110,15 @@ int main(int argc, char **argv)
     free(data);
 
     return EXIT_SUCCESS;
+}
+
+double get_time()
+{
+    struct timeval timecheck;
+
+    gettimeofday(&timecheck, NULL);
+
+    return timecheck.tv_sec + timecheck.tv_usec / 1000000.0;
 }
 
 void print_usage(char *pgr_name)
