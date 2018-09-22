@@ -1,21 +1,3 @@
-/*
- * File: segmentation_serial.c
- * --------------------
- * This file represents the core of the program. It contains the serial
- * implementation of color-based segmentation using k-means clustering algorithm.
- *
- * MATRICES IMPLEMENTATION POLICY
- *
- * In this program, matrices have been implemented using unidimensional arrays.
- * According to this practice, a matrix of N rows and M columns is stored using
- * an array of size N * M. To get the (i,j) element of the matrix, we'll need to
- * access the [i * M + j] index of the array (since row-major ordering has been
- * applied). Adopting this solution, memory allocation is easy to implement
- * and the access to the elements of the matrix is fast, but may result
- * complicated in terms of code readability. In the comments, unidimensional
- * arrays used as matrices are directly referred as matrices.
- */
-
 #include <stdlib.h>
 #include <float.h>
 #include <math.h>
@@ -30,23 +12,6 @@ void update_centers(byte_t *data, double *centers, int *labels, double *dists, i
 void update_data(byte_t *data, double *centers, int *labels, int n_px, int n_ch);
 void compute_sse(double *sse, double *dists, int n_px);
 
-/*
- * Function:  kmeans_segm_omp
- * --------------------
- * Performs color-based segmentation on the image data using the OpenMP parallel
- * version k-means clustering algorithm.
- *
- *  byte_t *data      --  matrix containing the color values of the pixels of the image,
- *                        outputs the color values of the pixel after the segmentation
- *  int    width      --  width of the image in pixels
- *  int    height     --  height of the image in pixels
- *  int    n_ch       --  number of color components of the image
- *  int    n_clus     --  number of clusters to use for the segmentation
- *  int    *n_iters   --  number of maximum iterations for k-means algorithm,
- *                        outputs the numbers of iterations that took to complete
- *  double *sse       --  outputs the of sum of squared errors of k-means algorithm
- *  int    n_threads  --  number of threads to use
- */
 void kmeans_segm_omp(byte_t *data, int width, int height, int n_ch, int n_clus, int *n_iters, double *sse, int n_threads)
 {
     int n_px;
@@ -89,17 +54,6 @@ void kmeans_segm_omp(byte_t *data, int width, int height, int n_ch, int n_clus, 
     free(dists);
 }
 
-/*
- * Function: initialize_centers
- * --------------------
- * Initialize the clusters centers with the values of randomly selected pixels.
- *
- *  byte_t *data     -- matrix containing the color values of the pixels of the image
- *  double *centers  -- matrix of the clusters centers
- *  int    n_px      -- number of pixels of the image
- *  int    n_ch      -- number of color components of the image
- *  int    n_clus    -- number of clusters to use for segmentation
- */
 void init_centers(byte_t *data, double *centers, int n_px, int n_ch, int n_clus)
 {
     int k, ch, rnd;
@@ -113,23 +67,6 @@ void init_centers(byte_t *data, double *centers, int n_px, int n_ch, int n_clus)
     }
 }
 
-/*
- * Function:  assign_pixels
- * --------------------
- * Assign each pixel to the closest cluster. For each pixel, the squared
- * Euclidean distance to all the clusters centers is computed. The pixel is then
- * assigned to the cluster for the squared Euclidean distance is the smallest.
- *
- *  byte_t *data     --  matrix containing the color values of the pixels of the image
- *  double *centers  --  matrix of the clusters centers
- *  int    *labels   --  indexes of the clusters to which each pixel belongs
- *  double *dists    --  distances of each pixel from their cluster center
- *  int    *changes  --  outputs a value different from 0 if there were changes in the
- *                       cluster assignments of the pixels
- *  int    n_px      --  number of pixels of the image
- *  int    n_ch      --  number of color components of the image
- *  int    n_clus    --  number of clusters to use for the segmentation
- */
 void assign_pixels(byte_t *data, double *centers, int *labels, double *dists, int *changes, int n_px, int n_ch, int n_clus)
 {
     int px, ch, k;
@@ -165,21 +102,6 @@ void assign_pixels(byte_t *data, double *centers, int *labels, double *dists, in
     *changes = tmp_changes;
 }
 
-/*
- * Function:  update_centers
- * --------------------
- * Update the the values of the clusters centers, by computing the mean of the
- * pixel objects belonging to each cluster. If a cluster is empty, its center is
- * set to the pixel which is farthest from its cluster center.
- *
- *  byte_t *data    --  matrix containing the color values of the pixels of the image
- *  double *centers --  matrix of the clusters centers, outputs the updated centers
- *  int    *labels  --  indexes of the clusters to which each pixel belongs
- *  double *dists   --  distances of each pixel from their cluster center
- *  int    n_px     --  number of pixels of the image
- *  int    n_ch     --  number of color components of the image
- *  int    n_clus   --  number of clusters to use for the segmentation
- */
 void update_centers(byte_t *data, double *centers, int *labels, double *dists, int n_px, int n_ch, int n_clus)
 {
     int px, ch, k;
@@ -238,19 +160,6 @@ void update_centers(byte_t *data, double *centers, int *labels, double *dists, i
     free(counts);
 }
 
-/*
- * Function: update_data
- * --------------------
- * Update the pixel data of the initial image according to the results of the
- * color-based segmentation using kmeans. The values of each pixel are replaced
- * with the ones of center of the cluster to which the pixel belongs.
- *
- *  byte_t *data     -- matrix containing the color values of the pixels of the image
- *  double *centers  -- matrix of the clusters centers
- *  int    *labels   -- indexes of the cluster to which each pixel belongs
- *  int    n_px      -- number of pixels of the image
- *  int    n_ch      -- number of color components of the image
- */
 void update_data(byte_t *data, double *centers, int *labels, int n_px, int n_ch)
 {
     int px, ch, min_k;
@@ -265,15 +174,6 @@ void update_data(byte_t *data, double *centers, int *labels, int n_px, int n_ch)
     }
 }
 
-/*
- * Function: compute_sse
- * --------------------
- * Computes the Sum of Squared Errors of the final cluster configuration.
- *
- *  double *sse    -- outputs the sum of squared errors
- *  double *dists  -- array of the distances of each pixel from its cluster center
- *  int    n_px    -- number of pixels of the image
- */
 void compute_sse(double *sse, double *dists, int n_px)
 {
     int px;

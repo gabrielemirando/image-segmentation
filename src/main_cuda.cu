@@ -3,8 +3,12 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/time.h>
+#include <cuda_runtime.h>
 
-#include "image_io.h"
+extern "C" { 
+    #include "image_io.h" 
+}
+
 #include "segmentation.h"
 
 #define DEFAULT_N_CLUS 4
@@ -12,6 +16,7 @@
 #define DEFAULT_OUT_PATH "result.jpg"
 
 double get_time();
+void print_devices();
 void print_usage(char *pgr_name);
 void print_exec(int width, int height, int n_ch, int n_clus, int n_iters, double sse, double exec_time);
 
@@ -72,6 +77,8 @@ int main(int argc, char **argv)
 
     srand(seed);
 
+    print_devices();
+
     // SCANNING INPUT IMAGE
 
     data = img_load(in_path, &width, &height, &n_ch);
@@ -79,7 +86,7 @@ int main(int argc, char **argv)
     // EXECUTING KMEANS SEGMENTATION
 
     start_time = get_time();
-    kmeans_segm(data, width, height, n_ch, n_clus, &n_iters, &sse);
+    kmeans_segm_cuda(data, width, height, n_ch, n_clus, &n_iters, &sse);
     exec_time = get_time() - start_time;
 
     // SAVING AND PRINTING RESULTS
@@ -103,7 +110,7 @@ double get_time()
 
 void print_usage(char *pgr_name)
 {
-    char *usage = "\nPROGRAM USAGE \n\n"
+    const char *usage = "\nPROGRAM USAGE \n\n"
         "   %s [-h] [-k num_clusters] [-m max_iters] [-o output_img] \n"
         "                [-o output_img] [-s seed] input_image \n\n"
         "   The input image filepath is the only mandatory argument and \n"
@@ -130,9 +137,26 @@ void print_usage(char *pgr_name)
     fprintf(stderr, usage, pgr_name, DEFAULT_N_CLUS, DEFAULT_MAX_ITERS);
 }
 
+void print_devices() 
+{
+    int i, n_devices;
+    cudaDeviceProp prop;
+
+    cudaGetDeviceCount(&n_devices);
+
+    printf("\nCUDA DEVICES AVAILABLE\n\n");
+    
+    for (i = 0; i < n_devices; i++) {
+        cudaGetDeviceProperties(&prop, i);
+        printf("  Device number       : %d\n", i);
+        printf("  Device name         : %s\n", prop.name);
+        printf("  Compute capability  : %d.%d\n\n", prop.major, prop.minor);
+    }
+}
+
 void print_exec(int width, int height, int n_ch, int n_clus, int n_iters, double sse, double exec_time)
 {
-    char *details = "\nEXECUTION DETAILS\n\n"
+    const char *details = "EXECUTION DETAILS\n\n"
         "  Image size             : %d x %d\n"
         "  Color channels         : %d\n"
         "  Number of clusters     : %d\n"
@@ -142,3 +166,4 @@ void print_exec(int width, int height, int n_ch, int n_clus, int n_iters, double
 
     fprintf(stdout, details, width, height, n_ch, n_clus, n_iters, sse, exec_time);
 }
+ 

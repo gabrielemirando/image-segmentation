@@ -1,12 +1,3 @@
-/*
- * File:   main_omp.c
- * --------------------
- * This file contains the main function that defines the flow of the parallel
- * version of program. It's basically a copy of main_serial.c, with the exception
- * that  for this version an optional parameter indicating the number of threads
- * can be specified in the command line when launching the program.
- */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -24,7 +15,7 @@
 
 double get_time();
 void print_usage(char *pgr_name);
-void print_details(int width, int height, int n_ch, int n_clus, int n_threads, int n_iters, double sse, double exec_time);
+void print_exec(int width, int height, int n_ch, int n_clus, int n_threads, int n_iters, double sse, double exec_time);
 
 int main(int argc, char **argv)
 {
@@ -105,7 +96,7 @@ int main(int argc, char **argv)
     // SAVING AND PRINTING RESULTS
 
     img_save(out_path, data, width, height, n_ch);
-    print_details(width, height, n_ch, n_clus, n_threads, n_iters, sse, exec_time);
+    print_exec(width, height, n_ch, n_clus, n_threads, n_iters, sse, exec_time);
 
     free(data);
 
@@ -153,15 +144,15 @@ void print_usage(char *pgr_name)
     fprintf(stderr, usage, pgr_name, DEFAULT_N_CLUSTS, DEFAULT_MAX_ITERS, DEFAULT_N_THREADS);
 }
 
-void print_details(int width, int height, int n_ch, int n_clus, int n_threads, int n_iters, double sse, double exec_time)
+void print_exec(int width, int height, int n_ch, int n_clus, int n_threads, int n_iters, double sse, double exec_time)
 {
     char *details = "\nEXECUTION DETAILS\n\n"
-        "  Image Size             : %d x %d\n"
+        "  Image size             : %d x %d\n"
         "  Color channels         : %d\n"
         "  Number of clusters     : %d\n"
         "  Number of threads      : %d\n"
         "  Number of iterations   : %d\n"
-        "  Sum of Squared Errors  : %f\n"
+        "  Sum of squared errors  : %f\n"
         "  Execution time         : %f\n\n";
 
     fprintf(stdout, details, width, height, n_ch, n_clus, n_threads, n_iters, sse, exec_time);
