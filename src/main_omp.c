@@ -144,7 +144,7 @@ void print_usage(char *pgr_name)
         "                     directory using JPEG format. \n"
         "   -s seed         : seed to use for the random selection of the initial \n"
         "                     centers. The clustering algorithm will always use  \n"
-        "                     the same set of initial centers when a certain \n"
+        "                     the same set of initial centers if the same \n"
         "                     seed is specified. \n"
         "   -t num_threads  : number of threads to use for the clustering algorithm. \n"
         "                     Must be bigger than 1. Default is %d. \n"
@@ -155,15 +155,14 @@ void print_usage(char *pgr_name)
 
 void print_details(int width, int height, int n_ch, int n_clus, int n_threads, int n_iters, double sse, double exec_time)
 {
-    char *details = "EXECUTION DETAILS\n"
-        "-------------------------------------------------------\n"
+    char *details = "\nEXECUTION DETAILS\n\n"
         "  Image Size             : %d x %d\n"
         "  Color channels         : %d\n"
         "  Number of clusters     : %d\n"
         "  Number of threads      : %d\n"
         "  Number of iterations   : %d\n"
         "  Sum of Squared Errors  : %f\n"
-        "  Execution time         : %f\n";
+        "  Execution time         : %f\n\n";
 
     fprintf(stdout, details, width, height, n_ch, n_clus, n_threads, n_iters, sse, exec_time);
 }
