@@ -15,7 +15,7 @@ The program can be compiled using the make command. Launching ```make all``` fro
 command line will produce three executables:
 * **serial.out**: it's the serial version of the program
 * **omp.out**: it's the parallel version implemented using OpenMP (requires 
-OpenMP 4.5, which is fully supported starting from GCC 6.1)
+OpenMP 4.5, supported from GCC 6.1)
 * **cuda.out**: it's the parallel version implemented using CUDA
 
 ## Usage
