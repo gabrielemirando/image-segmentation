@@ -117,7 +117,8 @@ void print_usage(char *pgr_name)
         "   must be specified last, after all the optional parameters. \n"
         "   Valid input image formats are JPEG, PNG, BMP, GIF, TGA, PSD, \n"
         "   PIC, HDR and PNM. The program performs a color-based segmentation\n"
-        "   of the input image using the k-means clustering algorithm. \n\n"
+        "   of the input image using a parallel version the k-means \n"
+        "   clustering algorithm implemented via CUDA.\n\n"
         "OPTIONAL PARAMETERS \n\n"
         "   -k num_clusters : number of clusters to use for the segmentation of \n"
         "                     the image. Must be bigger than 1. Default is %d. \n"
@@ -129,7 +130,7 @@ void print_usage(char *pgr_name)
         "                     the resulting image will be saved in the current \n"
         "                     directory using JPEG format. \n"
         "   -s seed         : seed to use for the random selection of the initial \n"
-        "                     centers. The clustering algorithm will always use  \n"
+        "                     centers. The clustering algorithm will always use \n"
         "                     the same set of initial centers if the same \n"
         "                     seed is specified. \n"
         "   -h              : print usage information. \n\n";
