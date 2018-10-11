@@ -12,7 +12,7 @@ The repository of the project is organized in folders:
 
 ## Compiling
 The program can be compiled using the make command. Launching ```make all``` from 
-command line will produce three executables:
+command line will produce:
 * **serial.out**: it's the serial version of the program
 * **omp.out**: it's the parallel version implemented using OpenMP (requires 
 OpenMP 4.5, supported from GCC 6.1)
@@ -25,7 +25,7 @@ the -h flag, when launching the program from command line. Common usages are:
 four clusters on the test image provided
  
 * ```./omp.out -k 4 -t 4 imgs/test_s.jpg```: to execute the parallel program with 
-four clusters on the test image provided using 4 CPU threads
+four clusters using 4 CPU threads
 
 ## Credits
 External help have been used for handling the I/O of images.
