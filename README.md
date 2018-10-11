@@ -16,7 +16,6 @@ command line will produce three executables:
 * **serial.out**: it's the serial version of the program
 * **omp.out**: it's the parallel version implemented using OpenMP (requires 
 OpenMP 4.5, supported from GCC 6.1)
-* **cuda.out**: it's the parallel version implemented using CUDA
 
 ## Usage
 The detailed information about the program usage can be obtained by specifying
@@ -27,9 +26,6 @@ four clusters on the test image provided
  
 * ```./omp.out -k 4 -t 4 imgs/test_s.jpg```: to execute the parallel program with 
 four clusters on the test image provided using 4 CPU threads
-
-* ```./cuda.out -k 4 imgs/test_s.jpg```: to execute the parallel program with 
-four clusters on the test image provided using a CUDA-enabled GPU
 
 ## Credits
 External help have been used for handling the I/O of images.

@@ -29,7 +29,7 @@ int main(int argc, char **argv)
     int seed = time(NULL);
     double sse, start_time, exec_time;
 
-    // PARSING ARGUMENTS AND OPTIONAL PARAMETERS
+    // Parsing arguments and optional parameters
 
     char optchar;
     while ((optchar = getopt(argc, argv, "k:m:o:s:t:h")) != -1) {
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 
     in_path = argv[optind];
 
-    // VALIDATING INPUT PARAMETERS
+    // Validating input parameters
 
     if (in_path == NULL) {
         print_usage(argv[0]);
@@ -83,17 +83,17 @@ int main(int argc, char **argv)
 
     srand(seed);
 
-    // SCANNING INPUT IMAGE
+    // Scanning input image
 
     data = img_load(in_path, &width, &height, &n_ch);
 
-    // EXECUTING KMEANS SEGMENTATION
+    // Executing k-means segmentation
 
     start_time = get_time();
     kmeans_segm_omp(data, width, height, n_ch, n_clus, &n_iters, &sse, n_threads);
     exec_time = get_time() - start_time;
 
-    // SAVING AND PRINTING RESULTS
+    // Saving and printing results
 
     img_save(out_path, data, width, height, n_ch);
     print_exec(width, height, n_ch, n_clus, n_threads, n_iters, sse, exec_time);
