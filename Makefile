@@ -2,7 +2,7 @@ CC = gcc
 CC_FLAGS = -Wall
 CC_OMP = -fopenmp
 
-all: serial.out omp.out 
+all: serial.out omp.out
 
 clean:
 	rm serial.out omp.out result.jpg

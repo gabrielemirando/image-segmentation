@@ -108,7 +108,7 @@ void update_centers(byte_t *data, double *centers, int *labels, double *dists, i
     counts = malloc(n_clus * sizeof(int));
 
     // Resetting centers and initializing clusters counters
-    
+
     for (k = 0; k < n_clus; k++) {
         for (ch = 0; ch < n_ch; ch++) {
             centers[k * n_ch + ch] = 0;
@@ -118,7 +118,7 @@ void update_centers(byte_t *data, double *centers, int *labels, double *dists, i
     }
 
     // Computing partial sums of the centers and updating clusters counters
-    
+
     for (px = 0; px < n_px; px++) {
         min_k = labels[px];
 
@@ -130,7 +130,7 @@ void update_centers(byte_t *data, double *centers, int *labels, double *dists, i
     }
 
     // Dividing to obtain the centers mean
-    
+
     for (k = 0; k < n_clus; k++) {
         if (counts[k]) {
             for (ch = 0; ch < n_ch; ch++) {
@@ -138,7 +138,7 @@ void update_centers(byte_t *data, double *centers, int *labels, double *dists, i
             }
         } else {
             // If the cluster is empty we find the farthest pixel from its cluster center
-            
+
             max_dist = 0;
 
             for (px = 0; px < n_px; px++) {
